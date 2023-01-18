@@ -56,4 +56,33 @@
     <string name="menu_kvp">KVP</string>
     <string name="menu_prep">PrEP</string>
 
+    <string name="optional">Sio lazima</string>
+    <string name="error_unable_save_visit">Imeshindwa kuitunza hii visit</string>
+    <string name="kvp_prep_registration">Usajili wa KVP/PrEP</string>
+    <string name="service_status">Status: %s</string>
+    <string name="service_action_count">Matendo: %d</string>
+    <string name="service_visit_count">Visits: %d</string>
+    <string name="process_visit">Chakata Hudhurio</string>
+    <string name="bio_medical_services">Afua za Kitabibu</string>
+    <string name="behavioral_services">Afua za Afya na Mabadiliko ya Kitabia</string>
+    <string name="structural_services">Afua za Kimuundo</string>
+    <string name="other_services">Afua zinginezo</string>
+    <string name="service_status_pending">Bado haijaanza</string>
+    <string name="service_status_ongoing">Imekwishaanza</string>
+    <string name="service_status_complete">Imekamilika</string>
+    <string name="process_visit_title">Je unauhakika unataka kuchakata?</string>
+    <string name="process_visit_message">Uchakataji wa hudhurio utapelekea kuhifadhiwa kwenye kanzi data na hutoweza kufanya uhakiki, lakini hudhulio hili litajichakata lenyewe siku ikibadilika.</string>
+    <string name="kvp_visit_in_progress">Hudhurio linaendelea</string>
+    <string name="continue_visit">Hariri</string>
+    <string name="service_status_processed">Processed</string>
+    <string name="visit_processed_message">Hudhurio limeanzishwa, waweza fanya Hudhurio lingine baada ya dakika 30 kutokea pale hudhurio ilipoanzishwa</string>
+    <string name="pending_prep_registration">Usajili wa dawa kinga (PrEP) haujakamilika</string>
+    <string name="register_to_service">Sajili</string>
+    <string name="refer_to_facility">toa rufaa</string>
+    <string name="uic_id">UIC ID: %s</string>
+    <string name="manual_process_visit">Chakata hudhurio</string>
+    <string name="prep_status_initiated">Ameanzishwa</string>
+    <string name="prep_visit_conducted">Hudhurio la dawa kinga limechukuliwa</string>
+
 </resources>
+
