@@ -204,7 +204,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_toStartOf="@+id/textview_undo"
+                android:layout_toStartOf="@+id/textview_register"
                 android:layout_toEndOf="@+id/on_progress_image"
                 android:padding="10dp"
                 android:text="@string/pending_prep_registration"
@@ -216,11 +216,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
-                android:gravity="center"
                 android:layout_centerVertical="true"
-                android:textAlignment="center"
+                android:gravity="center"
                 android:padding="10dp"
                 android:text="@string/register_to_service"
+                android:textAlignment="center"
                 android:textColor="@color/primary" />
 
         </RelativeLayout>
