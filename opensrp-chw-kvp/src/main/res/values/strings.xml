@@ -81,8 +81,21 @@
     <string name="register_to_service">Register</string>
     <string name="refer_to_facility">refer</string>
     <string name="uic_id">UIC ID: %s</string>
+    <string name="dominant_kvp_group">Dominant KVP Group: %s</string>
+    <string name="other_kvp_groups">Other KVP Groups: %s</string>
     <string name="manual_process_visit">Process Visit</string>
     <string name="prep_status_initiated">Initiated</string>
     <string name="prep_visit_conducted">PrEP Visit Conducted</string>
+
+    <string name="kvp_msm">High Risk Men</string>
+    <string name="kvp_pwud">PWUD</string>
+    <string name="kvp_pwid">PWID</string>
+    <string name="kvp_prisoner">Prisoners</string>
+    <string name="kvp_rumandee">Rumandee</string>
+    <string name="kvp_serodiscordant_couple">Serodiscordant couple</string>
+    <string name="kvp_mobile_population">Mobile population</string>
+    <string name="kvp_fsw">FSW</string>
+    <string name="kvp_agyw">AGYW</string>
+    <string name="kvp_other_vulnerable_population">Other vulnerable population</string>
 
 </resources>
