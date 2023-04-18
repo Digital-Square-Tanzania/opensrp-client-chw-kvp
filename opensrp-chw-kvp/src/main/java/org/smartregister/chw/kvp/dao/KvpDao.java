@@ -6,6 +6,8 @@ import org.smartregister.chw.kvp.util.Constants;
 import org.smartregister.dao.AbstractDao;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -370,6 +372,35 @@ public class KvpDao extends AbstractDao {
             return res.get(0);
         }
         return "";
+    }
+
+    public static List<String> getOtherKvpGroups(String baseEntityId) {
+        String sql = "SELECT other_kvp_category FROM ec_kvp_bio_medical_services p " +
+                " WHERE p.entity_id = '" + baseEntityId + "' ORDER by date(substr(p.kvp_visit_date, 7, 4) || '-' || substr(p.kvp_visit_date, 4, 2) || '-' || substr(p.kvp_visit_date, 1, 2)) DESC LIMIT 1";
+
+        DataMap<String> dataMap = cursor -> getCursorValue(cursor, "other_kvp_category");
+
+        List<String> res = readData(sql, dataMap);
+        if (res != null && res.size() != 0 && res.get(0) != null) {
+            try {
+                String kvpGroups = res.get(0);
+                List<String> otherKvpGroups = new ArrayList<>();
+                if (kvpGroups != null && kvpGroups.length() > 0) {
+                    if (kvpGroups.startsWith("[") && kvpGroups.endsWith("]")) {
+                        kvpGroups = kvpGroups.substring(1, kvpGroups.length() - 1); // Remove the brackets
+                        String[] elements = kvpGroups.split(",\\s*"); // Split the string using comma followed by optional whitespace
+                        otherKvpGroups = Arrays.asList(elements);
+                    } else {
+                        otherKvpGroups.add(kvpGroups); // Add the input string as a single element to the list
+                    }
+                }
+
+                return otherKvpGroups;
+            } catch (Exception e) {
+
+            }
+        }
+        return null;
     }
 
     public static boolean isPrEPInitiated(String baseEntityId) {

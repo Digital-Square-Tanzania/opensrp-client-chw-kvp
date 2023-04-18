@@ -3,6 +3,7 @@ package org.smartregister.chw.kvp.activity;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -13,6 +14,11 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.Toolbar;
+import androidx.viewpager.widget.ViewPager;
 
 import org.apache.commons.lang3.StringUtils;
 import org.smartregister.chw.kvp.KvpLibrary;
@@ -34,13 +40,12 @@ import org.smartregister.kvp.R;
 import org.smartregister.view.activity.BaseProfileActivity;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.widget.Toolbar;
-import androidx.viewpager.widget.ViewPager;
 import de.hdodenhof.circleimageview.CircleImageView;
 import timber.log.Timber;
 
@@ -71,6 +76,8 @@ public class BaseKvpProfileActivity extends BaseProfileActivity implements KvpPr
     protected RelativeLayout rlKvpPositiveDate;
     protected TextView textViewVisitDone;
     protected TextView textViewId;
+    protected TextView textViewDominantKvpGroup;
+    protected TextView textViewOtherKvpGroups;
     protected RelativeLayout visitDone;
     protected RelativeLayout visitInProgress;
     protected TextView textViewContinue;
@@ -147,6 +154,8 @@ public class BaseKvpProfileActivity extends BaseProfileActivity implements KvpPr
         textview_register = findViewById(R.id.textview_register);
         pendingPrEPRegistration = findViewById(R.id.record_prep_registration);
         textViewId = findViewById(R.id.textview_uic_id);
+        textViewDominantKvpGroup = findViewById(R.id.main_kvp_group);
+        textViewOtherKvpGroups = findViewById(R.id.other_kvp_groups);
         manualProcessVisit = findViewById(R.id.textview_manual_process);
         prep_status = findViewById(R.id.prep_status);
 
@@ -215,6 +224,7 @@ public class BaseKvpProfileActivity extends BaseProfileActivity implements KvpPr
         setupButtons();
         hideButtonsOnClosed();
         showUICID(memberObject.getBaseEntityId());
+        showKvpGroups(memberObject.getBaseEntityId());
         showInitiatedStatusForPrep(profileType, memberObject.getBaseEntityId());
     }
 
@@ -293,6 +303,52 @@ public class BaseKvpProfileActivity extends BaseProfileActivity implements KvpPr
 
     }
 
+    protected void showKvpGroups(String baseEntityId) {
+        if (!profileType.equalsIgnoreCase(Constants.PROFILE_TYPES.PrEP_PROFILE)) {
+            String dominantKVPGroup = KvpDao.getDominantKVPGroup(baseEntityId);
+            if (StringUtils.isNotBlank(dominantKVPGroup)) {
+                textViewDominantKvpGroup.setVisibility(View.VISIBLE);
+                List<String> dominantKvpGroup = new ArrayList<>(Arrays.asList(dominantKVPGroup));
+                textViewDominantKvpGroup.setText(getString(R.string.dominant_kvp_group, readStringResourcesWithPrefix(dominantKvpGroup, "kvp_")));
+            } else {
+                textViewDominantKvpGroup.setVisibility(View.GONE);
+            }
+
+            List<String> otherKvpGroups = KvpDao.getOtherKvpGroups(baseEntityId);
+            if (otherKvpGroups != null && !(otherKvpGroups.size() == 1 && otherKvpGroups.get(0).equalsIgnoreCase("none"))) {
+                textViewOtherKvpGroups.setVisibility(View.VISIBLE);
+                textViewOtherKvpGroups.setText(getString(R.string.other_kvp_groups, readStringResourcesWithPrefix(otherKvpGroups, "kvp_")));
+            } else {
+                textViewOtherKvpGroups.setVisibility(View.GONE);
+            }
+
+        } else {
+            textViewDominantKvpGroup.setVisibility(View.GONE);
+            textViewOtherKvpGroups.setVisibility(View.GONE);
+        }
+
+    }
+
+    protected String readStringResourcesWithPrefix(List<String> keys, String prefix) {
+        Resources resources = getResources();
+        String packageName = getPackageName();
+        List<String> resourceValues = new ArrayList<>();
+
+        for (String key : keys) {
+            String resourceKey = prefix + key;
+            int resourceId = resources.getIdentifier(resourceKey, "string", packageName);
+
+            if (resourceId != 0) {
+                String resourceValue = resources.getString(resourceId);
+                resourceValues.add(resourceValue);
+            } else {
+                System.out.println("Resource not found for key: " + resourceKey);
+            }
+        }
+
+        return String.join(", ", resourceValues);
+    }
+
     protected void showInitiatedStatusForPrep(String profileType, String baseEntityId) {
         if (profileType.equalsIgnoreCase(Constants.PROFILE_TYPES.PrEP_PROFILE)) {
             if (KvpDao.isPrEPInitiated(baseEntityId)) {
@@ -304,14 +360,14 @@ public class BaseKvpProfileActivity extends BaseProfileActivity implements KvpPr
     }
 
     protected boolean isPrEPRegistrationPending() {
-       // boolean screeningEligible = KvpDao.isClientEligibleForPrEPFromScreening(memberObject.getBaseEntityId());
+        // boolean screeningEligible = KvpDao.isClientEligibleForPrEPFromScreening(memberObject.getBaseEntityId());
         boolean htsNegative = KvpDao.isClientHTSResultsNegative(memberObject.getBaseEntityId());
         boolean isPrEPMember = KvpDao.isRegisteredForPrEP(memberObject.getBaseEntityId());
         //if the client on screening was eligible for PrEP and
         //if the client on bio-medical services hts results was negative
         //and if the client does not exist on the PrEP register
         //and if the client age is greater than 15
-        return  htsNegative && !isPrEPMember && memberObject.getAge() >= 15;
+        return htsNegative && !isPrEPMember && memberObject.getAge() >= 15;
     }
 
     @Override
