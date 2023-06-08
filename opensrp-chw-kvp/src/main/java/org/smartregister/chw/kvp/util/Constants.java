@@ -125,6 +125,7 @@ public interface Constants {
     interface JSON_FORM_KEY {
         String FACILITY_NAME = "facility_name";
         String UIC_ID = "uic_id";
+        String CLIENT_GROUP = "client_group";
     }
 
     interface PROFILE_TYPES {
