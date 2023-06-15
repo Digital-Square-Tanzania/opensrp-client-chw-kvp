@@ -1,5 +1,10 @@
 package org.smartregister.chw.kvp.util;
 
+import static org.smartregister.util.JsonFormUtils.getFieldValue;
+
+import com.google.gson.Gson;
+
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -9,12 +14,16 @@ import org.smartregister.chw.kvp.domain.MemberObject;
 import org.smartregister.chw.kvp.domain.Visit;
 import org.smartregister.chw.kvp.repository.VisitDetailsRepository;
 import org.smartregister.chw.kvp.repository.VisitRepository;
+import org.smartregister.clientandeventmodel.Event;
+import org.smartregister.clientandeventmodel.Obs;
+import org.smartregister.repository.AllSharedPreferences;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import timber.log.Timber;
 
@@ -41,6 +50,15 @@ public class KvpVisitsUtil extends VisitUtils {
             if (daysDiff > 1) {
                 if (v.getVisitType().equalsIgnoreCase(Constants.EVENT_TYPE.KVP_BIO_MEDICAL_SERVICE_VISIT) && getBioMedicalStatus(v).equals(Complete)) {
                     bioMedicalServiceVisit.add(v);
+                    String hivStatus = getHivStatus(v);
+                    if (hivStatus != null && hivStatus.equalsIgnoreCase("positive")) {
+                        Event baseEvent = generateHivRegistrationForPositiveKvpClients(v.getJson(), v.getBaseEntityId());
+                        if (StringUtils.isBlank(baseEvent.getFormSubmissionId()))
+                            baseEvent.setFormSubmissionId(UUID.randomUUID().toString());
+                        AllSharedPreferences allSharedPreferences = KvpLibrary.getInstance().context().allSharedPreferences();
+                        NCUtil.addEvent(allSharedPreferences, baseEvent);
+                        NCUtil.startClientProcessing();
+                    }
                 }
                 if (v.getVisitType().equalsIgnoreCase(Constants.EVENT_TYPE.KVP_BEHAVIORAL_SERVICE_VISIT) && getBehavioralServiceStatus(v).equals(Complete)) {
                     behavioralServiceVisits.add(v);
@@ -65,6 +83,43 @@ public class KvpVisitsUtil extends VisitUtils {
         if (otherServiceVisits.size() > 0) {
             processVisits(otherServiceVisits, visitRepository, visitDetailsRepository);
         }
+    }
+
+    protected static Event generateHivRegistrationForPositiveKvpClients(String jsonString, String baseEntityId) {
+        Event hivRegistrationEvent = new Gson().fromJson(jsonString, Event.class);
+
+        hivRegistrationEvent.setEntityType("ec_hiv_register");
+        hivRegistrationEvent.setEventType("HIV Registration");
+        hivRegistrationEvent.setBaseEntityId(baseEntityId);
+        hivRegistrationEvent.addObs(
+                (new Obs())
+                        .withFormSubmissionField("hiv_registration_date")
+                        .withValue(System.currentTimeMillis())
+                        .withFieldCode("hiv_registration_date")
+                        .withFieldType("formsubmissionField")
+                        .withFieldDataType("text")
+                        .withParentCode("")
+                        .withHumanReadableValues(new ArrayList<>()));
+        hivRegistrationEvent.addObs(
+                (new Obs())
+                        .withFormSubmissionField("client_hiv_status_during_registration")
+                        .withValue("positive")
+                        .withFieldCode("client_hiv_status_during_registration")
+                        .withFieldType("formsubmissionField")
+                        .withFieldDataType("text")
+                        .withParentCode("")
+                        .withHumanReadableValues(new ArrayList<>()));
+        hivRegistrationEvent.addObs(
+                (new Obs())
+                        .withFieldCode("client_hiv_status_after_testing")
+                        .withFormSubmissionField("test_results")
+                        .withValue("positive")
+                        .withFieldType("formsubmissionField")
+                        .withFieldDataType("text")
+                        .withParentCode("")
+                        .withHumanReadableValues(new ArrayList<>()));
+
+        return hivRegistrationEvent;
     }
 
     public static String getBioMedicalStatus(Visit lastVisit) {
@@ -94,6 +149,26 @@ public class KvpVisitsUtil extends VisitUtils {
             Timber.e(e);
         }
         return getActionStatus(completionObject);
+    }
+
+    public static String getHivStatus(Visit lastVisit) {
+        try {
+            JSONObject jsonObject = new JSONObject(lastVisit.getJson());
+            JSONArray obs = jsonObject.getJSONArray("obs");
+
+            for (int i = 0; i < obs.length(); i++) {
+                JSONObject checkObj = obs.getJSONObject(i);
+                if (checkObj.getString("fieldCode").equalsIgnoreCase("hiv_status")) {
+                    JSONArray values = checkObj.getJSONArray("values");
+                    return values.getString(0);
+                }
+            }
+
+            return getFieldValue(obs, "hiv_status");
+        } catch (Exception e) {
+            Timber.e(e);
+        }
+        return null;
     }
 
     public static String getBehavioralServiceStatus(Visit lastVisit) {
@@ -168,6 +243,18 @@ public class KvpVisitsUtil extends VisitUtils {
         VisitRepository visitRepository = KvpLibrary.getInstance().visitRepository();
         manualProcessedVisits.add(visit);
         processVisits(manualProcessedVisits, visitRepository, visitDetailsRepository);
+
+        if (visit.getVisitType().equalsIgnoreCase(Constants.EVENT_TYPE.KVP_BIO_MEDICAL_SERVICE_VISIT)) {
+            String hivStatus = getHivStatus(visit);
+            if (hivStatus != null && hivStatus.equalsIgnoreCase("positive")) {
+                Event baseEvent = generateHivRegistrationForPositiveKvpClients(visit.getJson(), visit.getBaseEntityId());
+                if (StringUtils.isBlank(baseEvent.getFormSubmissionId()))
+                    baseEvent.setFormSubmissionId(UUID.randomUUID().toString());
+                AllSharedPreferences allSharedPreferences = KvpLibrary.getInstance().context().allSharedPreferences();
+                NCUtil.addEvent(allSharedPreferences, baseEvent);
+                NCUtil.startClientProcessing();
+            }
+        }
     }
 
     public static String getKvpMemberGender(String baseEntityId) {

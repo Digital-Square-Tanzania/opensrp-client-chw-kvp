@@ -44,11 +44,9 @@ public class BaseKvpRegisterModel implements KvpRegisterContract.Model {
             KvpJsonFormUtils.initializeHealthFacilitiesList(referralHealthFacilities);
         }
 
-        JSONArray fieldsStep9 = jsonObject.getJSONObject(STEP_NINE).getJSONArray(JsonFormConstants.FIELDS);
-
-        JSONObject clientGroup = JsonFormUtils.getFieldJSONObject(fieldsStep9, Constants.JSON_FORM_KEY.CLIENT_GROUP);
-
         try {
+            JSONArray fieldsStep9 = jsonObject.getJSONObject(STEP_NINE).getJSONArray(JsonFormConstants.FIELDS);
+            JSONObject clientGroup = JsonFormUtils.getFieldJSONObject(fieldsStep9, Constants.JSON_FORM_KEY.CLIENT_GROUP);
             if (gender.equalsIgnoreCase("female") && clientGroup != null && age > 24) {
                 JSONArray options = clientGroup.getJSONArray(OPTIONS);
                 for (int i = 0; i < options.length(); i++) {

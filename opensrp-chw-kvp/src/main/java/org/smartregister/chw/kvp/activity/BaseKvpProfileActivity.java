@@ -189,6 +189,7 @@ public class BaseKvpProfileActivity extends BaseProfileActivity implements KvpPr
     protected void onResume() {
         super.onResume();
         setupViews();
+        refreshMedicalHistory(true);
     }
 
     @Override
