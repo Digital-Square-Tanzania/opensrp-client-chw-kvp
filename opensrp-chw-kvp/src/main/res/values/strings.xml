@@ -97,5 +97,10 @@
     <string name="kvp_fsw">FSW</string>
     <string name="kvp_agyw">AGYW</string>
     <string name="kvp_other_vulnerable_population">Other vulnerable population</string>
+    <string name="test_results">Test Results</string>
+    <string name="test_type_hepb">Hepatitis B</string>
+    <string name="test_type_hepc">Hepatitis C</string>
+    <string name="test_type_title">Test Type:</string>
+    <string name="record_results">Record Results</string>
 
 </resources>

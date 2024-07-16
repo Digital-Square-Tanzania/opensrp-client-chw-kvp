@@ -60,20 +60,18 @@ public class BaseKvpProfileActivity extends BaseProfileActivity implements KvpPr
     protected TextView textViewUniqueID;
     protected TextView textViewRecordKvp;
     protected TextView textViewRecordAnc;
-    protected TextView textview_positive_date;
     protected TextView textview_register;
     protected RelativeLayout pendingPrEPRegistration;
     protected View view_last_visit_row;
     protected View view_most_due_overdue_row;
     protected View view_family_row;
-    protected View view_positive_date_row;
+    protected View viewSeparator1;
     protected RelativeLayout rlLastVisit;
     protected RelativeLayout rlUpcomingServices;
     protected RelativeLayout rlFamilyServicesDue;
     protected RelativeLayout visitStatus;
     protected ImageView imageViewCross;
     protected TextView textViewUndo;
-    protected RelativeLayout rlKvpPositiveDate;
     protected TextView textViewVisitDone;
     protected TextView textViewId;
     protected TextView textViewDominantKvpGroup;
@@ -90,6 +88,7 @@ public class BaseKvpProfileActivity extends BaseProfileActivity implements KvpPr
     protected String profileType;
     private TextView tvUpComingServices;
     private TextView tvFamilyStatus;
+    protected RelativeLayout rlTestResults;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM", Locale.getDefault());
     private ProgressBar progressBar;
 
@@ -129,15 +128,13 @@ public class BaseKvpProfileActivity extends BaseProfileActivity implements KvpPr
         view_last_visit_row = findViewById(R.id.view_last_visit_row);
         view_most_due_overdue_row = findViewById(R.id.view_most_due_overdue_row);
         view_family_row = findViewById(R.id.view_family_row);
-        view_positive_date_row = findViewById(R.id.view_positive_date_row);
+        viewSeparator1 = findViewById(R.id.separator_1);
         imageViewCross = findViewById(R.id.tick_image);
         tvUpComingServices = findViewById(R.id.textview_name_due);
         tvFamilyStatus = findViewById(R.id.textview_family_has);
-        textview_positive_date = findViewById(R.id.textview_positive_date);
         rlLastVisit = findViewById(R.id.rlLastVisit);
         rlUpcomingServices = findViewById(R.id.rlUpcomingServices);
         rlFamilyServicesDue = findViewById(R.id.rlFamilyServicesDue);
-        rlKvpPositiveDate = findViewById(R.id.rlKvpPositiveDate);
         textViewVisitDone = findViewById(R.id.textview_visit_done);
         visitStatus = findViewById(R.id.record_visit_not_done_bar);
         visitDone = findViewById(R.id.visit_done_bar);
@@ -158,18 +155,19 @@ public class BaseKvpProfileActivity extends BaseProfileActivity implements KvpPr
         textViewOtherKvpGroups = findViewById(R.id.other_kvp_groups);
         manualProcessVisit = findViewById(R.id.textview_manual_process);
         prep_status = findViewById(R.id.prep_status);
+        rlTestResults = findViewById(R.id.rlTestResults);
 
         textViewRecordAncNotDone.setOnClickListener(this);
         textViewVisitDoneEdit.setOnClickListener(this);
         rlLastVisit.setOnClickListener(this);
         rlUpcomingServices.setOnClickListener(this);
         rlFamilyServicesDue.setOnClickListener(this);
-        rlKvpPositiveDate.setOnClickListener(this);
         textViewRecordKvp.setOnClickListener(this);
         textViewRecordAnc.setOnClickListener(this);
         textViewUndo.setOnClickListener(this);
         textViewContinue.setOnClickListener(this);
         textview_register.setOnClickListener(this);
+        rlTestResults.setOnClickListener(this);
 
         imageRenderHelper = new ImageRenderHelper(this);
         if (StringUtils.isNotBlank(profileType) && profileType.equalsIgnoreCase(Constants.PROFILE_TYPES.KVP_PROFILE)) {
@@ -234,7 +232,7 @@ public class BaseKvpProfileActivity extends BaseProfileActivity implements KvpPr
             try {
                 KvpVisitsUtil.processVisits();
             } catch (Exception e) {
-                e.printStackTrace();
+                Timber.e(e);
             }
             if (isPrEPRegistrationPending()) {
                 pendingPrEPRegistration.setVisibility(View.VISIBLE);
@@ -249,7 +247,7 @@ public class BaseKvpProfileActivity extends BaseProfileActivity implements KvpPr
             try {
                 PrEPVisitsUtil.processVisits();
             } catch (Exception e) {
-                e.printStackTrace();
+               Timber.e(e);
             }
 
             Visit lastPrepVisit = KvpLibrary.getInstance().visitRepository().getLatestVisit(memberObject.getBaseEntityId(), Constants.EVENT_TYPE.PrEP_FOLLOWUP_VISIT);
@@ -261,7 +259,7 @@ public class BaseKvpProfileActivity extends BaseProfileActivity implements KvpPr
                         displayToast(R.string.prep_visit_conducted);
                         setupViews();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Timber.e(e);
                     }
                 });
             } else {
@@ -396,7 +394,13 @@ public class BaseKvpProfileActivity extends BaseProfileActivity implements KvpPr
             this.openFollowupVisit();
         } else if (id == R.id.textview_register) {
             this.startPrEPRegistration();
+        }else if (id == R.id.rlTestResults) {
+            this.openTestResults();
         }
+    }
+
+    public void openTestResults() {
+        //implement
     }
 
     protected void startPrEPRegistration() {
@@ -472,9 +476,7 @@ public class BaseKvpProfileActivity extends BaseProfileActivity implements KvpPr
         textViewLocation.setText(memberObject.getAddress());
         textViewUniqueID.setText(memberObject.getUniqueId());
 
-        if (memberObject.getKvpTestDate() != null) {
-            textview_positive_date.setText(getString(R.string.kvp_positive) + " " + formatTime(memberObject.getKvpTestDate()));
-        }
+
     }
 
     @Override

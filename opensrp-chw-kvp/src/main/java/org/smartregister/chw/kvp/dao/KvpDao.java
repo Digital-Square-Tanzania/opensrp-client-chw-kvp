@@ -27,6 +27,16 @@ public class KvpDao extends AbstractDao {
         return res.get(0) > 0;
     }
 
+    public static boolean hasTestResults(String baseEntityID) {
+        String sql = "SELECT  test_type  FROM "+Constants.TABLES.KVP_HEPATITIS_TEST_RESULTS+" WHERE entity_id = '" + baseEntityID + "' AND test_type IS NOT NULL ORDER BY last_interacted_with DESC LIMIT 1";
+
+        DataMap<String> testTypeDataMap = cursor -> getCursorValue(cursor, "test_type");
+
+        List<String> testTypeRes = readData(sql, testTypeDataMap);
+
+        return testTypeRes != null && !testTypeRes.isEmpty();
+    }
+
     public static boolean isRegisteredForKvp(String baseEntityID) {
         String sql = "SELECT count(p.base_entity_id) count FROM ec_kvp_register p " +
                 "WHERE p.base_entity_id = '" + baseEntityID + "' AND p.is_closed = 0 ";
@@ -185,7 +195,7 @@ public class KvpDao extends AbstractDao {
     public static MemberObject getKvpMember(String baseEntityID) {
         String sql = "select m.base_entity_id,\n" +
                 "       m.unique_id,\n" +
-                "       m.relational_id,\n" +
+                "       m.relational_id as family_base_entity_id,\n" +
                 "       m.dob,\n" +
                 "       m.first_name,\n" +
                 "       m.middle_name,\n" +
@@ -228,8 +238,8 @@ public class KvpDao extends AbstractDao {
             memberObject.setGender(getCursorValue(cursor, "gender"));
             memberObject.setUniqueId(getCursorValue(cursor, "unique_id", ""));
             memberObject.setDob(getCursorValue(cursor, "dob"));
-            memberObject.setFamilyBaseEntityId(getCursorValue(cursor, "relational_id", ""));
-            memberObject.setRelationalId(getCursorValue(cursor, "relational_id", ""));
+            memberObject.setFamilyBaseEntityId(getCursorValue(cursor, "family_base_entity_id", ""));
+            memberObject.setRelationalId(getCursorValue(cursor, "family_base_entity_id", ""));
             memberObject.setPrimaryCareGiver(getCursorValue(cursor, "primary_caregiver"));
             memberObject.setFamilyName(getCursorValue(cursor, "family_name", ""));
             memberObject.setPhoneNumber(getCursorValue(cursor, "phone_number", ""));

@@ -7,6 +7,7 @@ public class DBConstants {
         public static final String MIDDLE_NAME = "middle_name";
         public static final String LAST_NAME = "last_name";
         public static final String BASE_ENTITY_ID = "base_entity_id";
+        public static final String ENTITY_ID = "entity_id";
         public static final String FAMILY_BASE_ENTITY_ID = "family_base_entity_id";
         public static final String DOB = "dob";
         public static final String DOD = "dod";
@@ -45,6 +46,11 @@ public class DBConstants {
         public static final String KVP_FOLLOW_UP_DATE = "date_chw_mfollowup";
         public static final String CHILD = "ec_child";
         public static final String PrEP_STATUS = "prep_status";
+        public static final String HEPATITIS_TEST_TYPE = "test_type";
+        public static final String HEP_TEST_RESULTS = "test_results";
+        public static final String TEST_DATE = "test_date";
+        public static final String VISIT_ID = "visit_id";
+        public static final String KVP_HEPATITIS_TEST_RESULTS_FOLLOWUP_FORM_SUBMISSION_ID = "kvp_hepatitis_test_results_followup_form_submission_id";
 
     }
 }
