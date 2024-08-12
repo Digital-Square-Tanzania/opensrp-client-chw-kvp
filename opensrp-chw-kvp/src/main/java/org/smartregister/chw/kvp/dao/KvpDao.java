@@ -37,6 +37,16 @@ public class KvpDao extends AbstractDao {
         return testTypeRes != null && !testTypeRes.isEmpty();
     }
 
+    public static boolean hasPrepTestResults(String baseEntityID) {
+        String sql = "SELECT  test_type  FROM "+Constants.TABLES.PREP_HEPATITIS_AND_CRCL_TEST_RESULTS+" WHERE entity_id = '" + baseEntityID + "' AND test_type IS NOT NULL ORDER BY last_interacted_with DESC LIMIT 1";
+
+        DataMap<String> testTypeDataMap = cursor -> getCursorValue(cursor, "test_type");
+
+        List<String> testTypeRes = readData(sql, testTypeDataMap);
+
+        return testTypeRes != null && !testTypeRes.isEmpty();
+    }
+
     public static boolean isRegisteredForKvp(String baseEntityID) {
         String sql = "SELECT count(p.base_entity_id) count FROM ec_kvp_register p " +
                 "WHERE p.base_entity_id = '" + baseEntityID + "' AND p.is_closed = 0 ";

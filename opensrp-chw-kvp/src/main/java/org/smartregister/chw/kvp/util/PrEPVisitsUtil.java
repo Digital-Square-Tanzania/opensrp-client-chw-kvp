@@ -1,7 +1,10 @@
 package org.smartregister.chw.kvp.util;
 
+import static org.smartregister.util.JsonFormUtils.getFieldValue;
+
 import com.google.gson.Gson;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,6 +13,7 @@ import org.smartregister.chw.kvp.domain.Visit;
 import org.smartregister.chw.kvp.repository.VisitDetailsRepository;
 import org.smartregister.chw.kvp.repository.VisitRepository;
 import org.smartregister.clientandeventmodel.Event;
+import org.smartregister.clientandeventmodel.Obs;
 import org.smartregister.repository.AllSharedPreferences;
 
 import java.util.ArrayList;
@@ -41,10 +45,43 @@ public class PrEPVisitsUtil extends VisitUtils {
             if (daysDiff > 1) {
                 if (v.getVisitType().equalsIgnoreCase(Constants.EVENT_TYPE.PrEP_FOLLOWUP_VISIT) && getPrEPVisitStatus(v).equals(Complete)) {
                     prepFollowupVisit.add(v);
+                    try {
+                        if (getHepTesting(v, "tested_hbv").equals("yes")) {
+                            Event baseEvent = generateHepAndCrclTestResultsRegistrationEvent(v.getVisitId() + "-hep_b", v.getBaseEntityId(), "hep_b", getHepTesting(v, "hbv_results"), v.getDate());
+                            if (StringUtils.isBlank(baseEvent.getFormSubmissionId()))
+                                baseEvent.setFormSubmissionId(UUID.randomUUID().toString());
+                            AllSharedPreferences allSharedPreferences = KvpLibrary.getInstance().context().allSharedPreferences();
+                            KvpJsonFormUtils.tagEvent(allSharedPreferences, baseEvent);
+                            NCUtil.addEvent(allSharedPreferences, baseEvent);
+                            NCUtil.startClientProcessing();
+                        }
+
+                        if (getHepTesting(v, "tested_hcv").equals("yes")) {
+                            Event baseEvent = generateHepAndCrclTestResultsRegistrationEvent(v.getVisitId() + "-hep_c", v.getBaseEntityId(), "hep_c", getHepTesting(v, "hcv_results"), v.getDate());
+                            if (StringUtils.isBlank(baseEvent.getFormSubmissionId()))
+                                baseEvent.setFormSubmissionId(UUID.randomUUID().toString());
+                            AllSharedPreferences allSharedPreferences = KvpLibrary.getInstance().context().allSharedPreferences();
+                            KvpJsonFormUtils.tagEvent(allSharedPreferences, baseEvent);
+                            NCUtil.addEvent(allSharedPreferences, baseEvent);
+                            NCUtil.startClientProcessing();
+                        }
+
+                        if (getHepTesting(v, "tested_crcl").equals("yes")) {
+                            Event baseEvent = generateHepAndCrclTestResultsRegistrationEvent(v.getVisitId() + "-crcl", v.getBaseEntityId(), "crcl", getHepTesting(v, "crcl_results"), v.getDate());
+                            if (StringUtils.isBlank(baseEvent.getFormSubmissionId()))
+                                baseEvent.setFormSubmissionId(UUID.randomUUID().toString());
+                            AllSharedPreferences allSharedPreferences = KvpLibrary.getInstance().context().allSharedPreferences();
+                            KvpJsonFormUtils.tagEvent(allSharedPreferences, baseEvent);
+                            NCUtil.addEvent(allSharedPreferences, baseEvent);
+                            NCUtil.startClientProcessing();
+                        }
+                    } catch (Exception e) {
+                        Timber.e(e);
+                    }
                 }
             }
         }
-        if (prepFollowupVisit.size() > 0) {
+        if (!prepFollowupVisit.isEmpty()) {
             processVisits(prepFollowupVisit, visitRepository, visitDetailsRepository);
             for (Visit v : prepFollowupVisit) {
                 if (shouldCreateCloseVisitEvent(v)) {
@@ -117,6 +154,40 @@ public class PrEPVisitsUtil extends VisitUtils {
         if (shouldCreateCloseVisitEvent(visit)) {
             createCancelledEvent(visit.getJson());
         }
+
+        try {
+            if (getHepTesting(visit, "tested_hbv").equals("yes")) {
+                Event baseEvent = generateHepAndCrclTestResultsRegistrationEvent(visit.getVisitId() + "-hep_b", visit.getBaseEntityId(), "hep_b", getHepTesting(visit, "hbv_results"), visit.getDate());
+                if (StringUtils.isBlank(baseEvent.getFormSubmissionId()))
+                    baseEvent.setFormSubmissionId(UUID.randomUUID().toString());
+                AllSharedPreferences allSharedPreferences = KvpLibrary.getInstance().context().allSharedPreferences();
+                KvpJsonFormUtils.tagEvent(allSharedPreferences, baseEvent);
+                NCUtil.addEvent(allSharedPreferences, baseEvent);
+                NCUtil.startClientProcessing();
+            }
+
+            if (getHepTesting(visit, "tested_hcv").equals("yes")) {
+                Event baseEvent = generateHepAndCrclTestResultsRegistrationEvent(visit.getVisitId() + "-hep_c", visit.getBaseEntityId(), "hep_c", getHepTesting(visit, "hcv_results"), visit.getDate());
+                if (StringUtils.isBlank(baseEvent.getFormSubmissionId()))
+                    baseEvent.setFormSubmissionId(UUID.randomUUID().toString());
+                AllSharedPreferences allSharedPreferences = KvpLibrary.getInstance().context().allSharedPreferences();
+                KvpJsonFormUtils.tagEvent(allSharedPreferences, baseEvent);
+                NCUtil.addEvent(allSharedPreferences, baseEvent);
+                NCUtil.startClientProcessing();
+            }
+
+            if (getHepTesting(visit, "tested_crcl").equals("yes")) {
+                Event baseEvent = generateHepAndCrclTestResultsRegistrationEvent(visit.getVisitId() + "-crcl", visit.getBaseEntityId(), "crcl", getHepTesting(visit, "crcl_results"), visit.getDate());
+                if (StringUtils.isBlank(baseEvent.getFormSubmissionId()))
+                    baseEvent.setFormSubmissionId(UUID.randomUUID().toString());
+                AllSharedPreferences allSharedPreferences = KvpLibrary.getInstance().context().allSharedPreferences();
+                KvpJsonFormUtils.tagEvent(allSharedPreferences, baseEvent);
+                NCUtil.addEvent(allSharedPreferences, baseEvent);
+                NCUtil.startClientProcessing();
+            }
+        } catch (Exception e) {
+            Timber.e(e);
+        }
     }
 
     public static boolean checkIfShouldInitiateToPrEP(JSONArray obs) throws JSONException {
@@ -156,5 +227,75 @@ public class PrEPVisitsUtil extends VisitUtils {
             Timber.e(e);
         }
         return false;
+    }
+
+    protected static Event generateHepAndCrclTestResultsRegistrationEvent(String visitId, String baseEntityId, String testType, String testResults, Date testsDate) {
+        Event hepTestResultsRegistrationEvent = new Event();
+
+        hepTestResultsRegistrationEvent.setEntityType("ec_prep_hepatitis_and_crcl_test_results");
+        hepTestResultsRegistrationEvent.setEventType("Hepatitis and CrCL Test Results Registration");
+        hepTestResultsRegistrationEvent.setBaseEntityId(baseEntityId);
+        hepTestResultsRegistrationEvent.addObs(
+                (new Obs())
+                        .withFormSubmissionField(DBConstants.KEY.VISIT_ID)
+                        .withValue(visitId)
+                        .withFieldCode(DBConstants.KEY.VISIT_ID)
+                        .withFieldType("formsubmissionField")
+                        .withFieldDataType("text")
+                        .withParentCode("")
+                        .withHumanReadableValues(new ArrayList<>()));
+
+        hepTestResultsRegistrationEvent.addObs(
+                (new Obs())
+                        .withFormSubmissionField("test_type")
+                        .withValue(testType)
+                        .withFieldCode("test_type")
+                        .withFieldType("formsubmissionField")
+                        .withFieldDataType("text")
+                        .withParentCode("")
+                        .withHumanReadableValues(new ArrayList<>()));
+
+        hepTestResultsRegistrationEvent.addObs(
+                (new Obs())
+                        .withFormSubmissionField("test_date")
+                        .withValue(testsDate)
+                        .withFieldCode("test_date")
+                        .withFieldType("formsubmissionField")
+                        .withFieldDataType("text")
+                        .withParentCode("")
+                        .withHumanReadableValues(new ArrayList<>()));
+
+        if (testResults != null) {
+            hepTestResultsRegistrationEvent.addObs(
+                    (new Obs())
+                            .withFormSubmissionField("test_results")
+                            .withValue(testResults)
+                            .withFieldCode("test_results")
+                            .withFieldType("formsubmissionField")
+                            .withFieldDataType("text")
+                            .withParentCode("")
+                            .withHumanReadableValues(new ArrayList<>()));
+
+        }
+        return hepTestResultsRegistrationEvent;
+    }
+
+    public static String getHepTesting(Visit lastVisit, String key) {
+        try {
+            JSONObject jsonObject = new JSONObject(lastVisit.getJson());
+            JSONArray obs = jsonObject.getJSONArray("obs");
+
+            for (int i = 0; i < obs.length(); i++) {
+                JSONObject checkObj = obs.getJSONObject(i);
+                if (checkObj.getString("fieldCode").equalsIgnoreCase(key)) {
+                    JSONArray values = checkObj.getJSONArray("values");
+                    return values.getString(0);
+                }
+            }
+            return getFieldValue(obs, key);
+        } catch (Exception e) {
+            Timber.e(e);
+        }
+        return null;
     }
 }
