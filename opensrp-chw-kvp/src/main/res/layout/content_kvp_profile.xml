@@ -178,7 +178,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_toRightOf="@+id/baseline_image"
                 android:gravity="center_horizontal"
-                android:text="Hepatitis Test Results"
+                android:text="@string/hepatitis_test_results"
                 android:textColor="@android:color/black" />
 
             <org.smartregister.view.customcontrols.CustomFontTextView
@@ -189,7 +189,7 @@
                 android:layout_below="@+id/textview_baseline_results"
                 android:layout_marginLeft="10dp"
                 android:layout_toRightOf="@+id/baseline_image"
-                android:text="View Hepatitis Test Results"
+                android:text="@string/view_hepatitis_test_results"
                 android:textColor="@android:color/darker_gray" />
 
         </RelativeLayout>

@@ -288,7 +288,7 @@ public class KvpDao extends AbstractDao {
     public static MemberObject getPrEPMember(String baseEntityID) {
         String sql = "select m.base_entity_id,\n" +
                 "       m.unique_id,\n" +
-                "       m.relational_id,\n" +
+                "       m.relational_id as family_base_entity_id,\n" +
                 "       m.dob,\n" +
                 "       m.first_name,\n" +
                 "       m.middle_name,\n" +
@@ -331,7 +331,7 @@ public class KvpDao extends AbstractDao {
             memberObject.setGender(getCursorValue(cursor, "gender"));
             memberObject.setUniqueId(getCursorValue(cursor, "unique_id", ""));
             memberObject.setDob(getCursorValue(cursor, "dob"));
-            memberObject.setFamilyBaseEntityId(getCursorValue(cursor, "relational_id", ""));
+            memberObject.setFamilyBaseEntityId(getCursorValue(cursor, "family_base_entity_id", ""));
             memberObject.setRelationalId(getCursorValue(cursor, "relational_id", ""));
             memberObject.setPrimaryCareGiver(getCursorValue(cursor, "primary_caregiver"));
             memberObject.setFamilyName(getCursorValue(cursor, "family_name", ""));
