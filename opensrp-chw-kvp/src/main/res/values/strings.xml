@@ -13,6 +13,7 @@
     <string name="interpunct" translatable="false">\u00b7</string>
     <string name="kvp_followup_visit">FOLLOWUP\nVISIT</string>
     <string name="record_kvp">Provide KVP Service</string>
+    <string name="record_kvp_followup_visit">Record Follow up Visit</string>
     <string name="record_prep">Provide PrEP Service</string>
     <string name="return_to_previous_page">Return all KVP Clients</string>
     <string name="return_to_kvp_clients">Return all KVP Clients</string>

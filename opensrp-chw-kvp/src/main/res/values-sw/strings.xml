@@ -11,6 +11,7 @@
     <string name="saving_dialog_title">Kuhifadhi</string>
     <string name="kvp_followup_visit">Tembeleo la ufuatiliaji</string>
     <string name="record_kvp">Rekodi ufuatiliaji wa kvp</string>
+    <string name="record_kvp_followup_visit">Rekodi ufuatiliaji wa kvp</string>
     <string name="record_prep">Rekodi ufuatiliaji wa PrEP</string>
     <string name="return_to_previous_page">Rudi kwenye wateja wote wa KVP</string>
     <string name="return_to_kvp_clients">Rudi kwenye wateja wote wa KVP</string>

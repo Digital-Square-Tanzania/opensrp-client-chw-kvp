@@ -1,5 +1,7 @@
 package org.smartregister.chw.kvp.provider;
 
+import static org.smartregister.util.Utils.getName;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.view.LayoutInflater;
@@ -7,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -28,10 +32,7 @@ import org.smartregister.view.viewholder.OnClickFormLauncher;
 import java.text.MessageFormat;
 import java.util.Set;
 
-import androidx.recyclerview.widget.RecyclerView;
 import timber.log.Timber;
-
-import static org.smartregister.util.Utils.getName;
 
 public class KvpRegisterProvider implements RecyclerViewProvider<KvpRegisterProvider.RegisterViewHolder> {
 
@@ -89,7 +90,27 @@ public class KvpRegisterProvider implements RecyclerViewProvider<KvpRegisterProv
 
             String prepStatus = Utils.getValue(pc.getColumnmaps(), DBConstants.KEY.PrEP_STATUS, false);
             if (StringUtils.isNotBlank(prepStatus) && !(prepStatus.equalsIgnoreCase("not_initiated") || prepStatus.equalsIgnoreCase("discontinued_quit"))) {
-                viewHolder.tvPrepStatus.setVisibility(View.VISIBLE);
+                String translatedPrepStatusString;
+                switch (prepStatus) {
+                    case "initiated":
+                        translatedPrepStatusString = "Initiated";
+                        break;
+                    case "continuing":
+                        translatedPrepStatusString = "Continuing";
+                        break;
+                    case "re_start":
+                        translatedPrepStatusString = "Re-started";
+                        break;
+                    default:
+                        translatedPrepStatusString = "";  // fallback to the original value if none matches
+                }
+
+                if (StringUtils.isNotBlank(translatedPrepStatusString)) {
+                    viewHolder.tvPrepStatus.setVisibility(View.VISIBLE);
+                    viewHolder.tvPrepStatus.setText(translatedPrepStatusString);
+                } else {
+                    viewHolder.tvPrepStatus.setVisibility(View.GONE);
+                }
             } else {
                 viewHolder.tvPrepStatus.setVisibility(View.GONE);
             }
