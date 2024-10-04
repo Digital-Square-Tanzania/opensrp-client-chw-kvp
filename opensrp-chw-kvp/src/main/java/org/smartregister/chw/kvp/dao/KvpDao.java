@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import timber.log.Timber;
+
 public class KvpDao extends AbstractDao {
 
 
@@ -28,7 +30,7 @@ public class KvpDao extends AbstractDao {
     }
 
     public static boolean hasTestResults(String baseEntityID) {
-        String sql = "SELECT  test_type  FROM "+Constants.TABLES.KVP_HEPATITIS_TEST_RESULTS+" WHERE entity_id = '" + baseEntityID + "' AND test_type IS NOT NULL ORDER BY last_interacted_with DESC LIMIT 1";
+        String sql = "SELECT  test_type  FROM " + Constants.TABLES.KVP_HEPATITIS_TEST_RESULTS + " WHERE entity_id = '" + baseEntityID + "' AND test_type IS NOT NULL ORDER BY last_interacted_with DESC LIMIT 1";
 
         DataMap<String> testTypeDataMap = cursor -> getCursorValue(cursor, "test_type");
 
@@ -38,7 +40,7 @@ public class KvpDao extends AbstractDao {
     }
 
     public static boolean hasPrepTestResults(String baseEntityID) {
-        String sql = "SELECT  test_type  FROM "+Constants.TABLES.PREP_HEPATITIS_AND_CRCL_TEST_RESULTS+" WHERE entity_id = '" + baseEntityID + "' AND test_type IS NOT NULL ORDER BY last_interacted_with DESC LIMIT 1";
+        String sql = "SELECT  test_type  FROM " + Constants.TABLES.PREP_HEPATITIS_AND_CRCL_TEST_RESULTS + " WHERE entity_id = '" + baseEntityID + "' AND test_type IS NOT NULL ORDER BY last_interacted_with DESC LIMIT 1";
 
         DataMap<String> testTypeDataMap = cursor -> getCursorValue(cursor, "test_type");
 
@@ -447,5 +449,21 @@ public class KvpDao extends AbstractDao {
             return res.get(0);
         }
         return null;
+    }
+
+    public static String getSyncLocationId(String baseEntityId) {
+        try {
+            String sql = String.format("SELECT sync_location_id FROM ec_family_member WHERE base_entity_id = '%s'", baseEntityId);
+            DataMap<String> dataMap = cursor -> getCursorValue(cursor, "sync_location_id");
+            List<String> res = readData(sql, dataMap);
+
+            if (res == null || res.size() != 1)
+                return null;
+
+            return res.get(0);
+        } catch (Exception e) {
+            Timber.e(e);
+            return null;
+        }
     }
 }
