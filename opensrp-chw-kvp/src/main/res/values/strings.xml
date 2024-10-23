@@ -13,6 +13,7 @@
     <string name="interpunct" translatable="false">\u00b7</string>
     <string name="kvp_followup_visit">FOLLOWUP\nVISIT</string>
     <string name="record_kvp">Provide KVP Service</string>
+    <string name="record_kvp_followup_visit">Record Follow up Visit</string>
     <string name="record_prep">Provide PrEP Service</string>
     <string name="return_to_previous_page">Return all KVP Clients</string>
     <string name="return_to_kvp_clients">Return all KVP Clients</string>
@@ -97,5 +98,12 @@
     <string name="kvp_fsw">FSW</string>
     <string name="kvp_agyw">AGYW</string>
     <string name="kvp_other_vulnerable_population">Other vulnerable population</string>
+    <string name="test_results">Test Results</string>
+    <string name="test_type_hepb">Hepatitis B</string>
+    <string name="test_type_hepc">Hepatitis C</string>
+    <string name="test_type_title">Test Type:</string>
+    <string name="record_results">Record Results</string>
+    <string name="hepatitis_test_results">Hepatitis Test Results</string>
+    <string name="view_hepatitis_test_results">View Test Results</string>
 
 </resources>
