@@ -59,6 +59,30 @@ public class KvpVisitsUtil extends VisitUtils {
                         NCUtil.addEvent(allSharedPreferences, baseEvent);
                         NCUtil.startClientProcessing();
                     }
+
+                    try {
+                        if (getHepTesting(v, "hep_b_testing").equals("yes")) {
+                            Event baseEvent = generateHepTestResultsRegistrationEvent(v.getVisitId() + "-hep_b", v.getBaseEntityId(), "hep_b", getHepTesting(v, "hep_b_result"), v.getDate());
+                            if (StringUtils.isBlank(baseEvent.getFormSubmissionId()))
+                                baseEvent.setFormSubmissionId(UUID.randomUUID().toString());
+                            AllSharedPreferences allSharedPreferences = KvpLibrary.getInstance().context().allSharedPreferences();
+                            KvpJsonFormUtils.tagEvent(allSharedPreferences, baseEvent);
+                            NCUtil.addEvent(allSharedPreferences, baseEvent);
+                            NCUtil.startClientProcessing();
+                        }
+
+                        if (getHepTesting(v, "hep_c_testing").equals("yes")) {
+                            Event baseEvent = generateHepTestResultsRegistrationEvent(v.getVisitId() + "-hep_c", v.getBaseEntityId(), "hep_c", getHepTesting(v, "hep_c_result"), v.getDate());
+                            if (StringUtils.isBlank(baseEvent.getFormSubmissionId()))
+                                baseEvent.setFormSubmissionId(UUID.randomUUID().toString());
+                            AllSharedPreferences allSharedPreferences = KvpLibrary.getInstance().context().allSharedPreferences();
+                            KvpJsonFormUtils.tagEvent(allSharedPreferences, baseEvent);
+                            NCUtil.addEvent(allSharedPreferences, baseEvent);
+                            NCUtil.startClientProcessing();
+                        }
+                    } catch (Exception e) {
+                        Timber.e(e);
+                    }
                 }
                 if (v.getVisitType().equalsIgnoreCase(Constants.EVENT_TYPE.KVP_BEHAVIORAL_SERVICE_VISIT) && getBehavioralServiceStatus(v).equals(Complete)) {
                     behavioralServiceVisits.add(v);
@@ -122,6 +146,57 @@ public class KvpVisitsUtil extends VisitUtils {
         return hivRegistrationEvent;
     }
 
+    protected static Event generateHepTestResultsRegistrationEvent(String visitId, String baseEntityId, String testType, String testResults, Date testsDate) {
+        Event hepTestResultsRegistrationEvent = new Event();
+
+        hepTestResultsRegistrationEvent.setEntityType("ec_kvp_hepatitis_test_results");
+        hepTestResultsRegistrationEvent.setEventType("Hepatitis Test Results Registration");
+        hepTestResultsRegistrationEvent.setBaseEntityId(baseEntityId);
+        hepTestResultsRegistrationEvent.addObs(
+                (new Obs())
+                        .withFormSubmissionField(DBConstants.KEY.VISIT_ID)
+                        .withValue(visitId)
+                        .withFieldCode(DBConstants.KEY.VISIT_ID)
+                        .withFieldType("formsubmissionField")
+                        .withFieldDataType("text")
+                        .withParentCode("")
+                        .withHumanReadableValues(new ArrayList<>()));
+
+        hepTestResultsRegistrationEvent.addObs(
+                (new Obs())
+                        .withFormSubmissionField("test_type")
+                        .withValue(testType)
+                        .withFieldCode("test_type")
+                        .withFieldType("formsubmissionField")
+                        .withFieldDataType("text")
+                        .withParentCode("")
+                        .withHumanReadableValues(new ArrayList<>()));
+
+        hepTestResultsRegistrationEvent.addObs(
+                (new Obs())
+                        .withFormSubmissionField("test_date")
+                        .withValue(testsDate)
+                        .withFieldCode("test_date")
+                        .withFieldType("formsubmissionField")
+                        .withFieldDataType("text")
+                        .withParentCode("")
+                        .withHumanReadableValues(new ArrayList<>()));
+
+        if (testResults != null) {
+            hepTestResultsRegistrationEvent.addObs(
+                    (new Obs())
+                            .withFormSubmissionField("test_results")
+                            .withValue(testResults)
+                            .withFieldCode("test_results")
+                            .withFieldType("formsubmissionField")
+                            .withFieldDataType("text")
+                            .withParentCode("")
+                            .withHumanReadableValues(new ArrayList<>()));
+
+        }
+        return hepTestResultsRegistrationEvent;
+    }
+
     public static String getBioMedicalStatus(Visit lastVisit) {
         HashMap<String, Boolean> completionObject = new HashMap<>();
         String gender = getKvpMemberGender(lastVisit.getBaseEntityId());
@@ -131,7 +206,7 @@ public class KvpVisitsUtil extends VisitUtils {
 
             completionObject.put("is-client_status-done", computeCompletionStatus(obs, "client_status"));
             completionObject.put("is-condom_provision-done", computeCompletionStatus(obs, "condoms_given"));
-            completionObject.put("is-hts-done", computeCompletionStatus(obs, "previous_hiv_testing_method"));
+            completionObject.put("is-hts-done", computeCompletionStatus(obs, "tested_hiv"));
             completionObject.put("is-hepatitis-done", computeCompletionStatus(obs, "hep_b_testing"));
             completionObject.put("is-family_planning-done", computeCompletionStatus(obs, "family_planning_service"));
 
@@ -165,6 +240,25 @@ public class KvpVisitsUtil extends VisitUtils {
             }
 
             return getFieldValue(obs, "hiv_status");
+        } catch (Exception e) {
+            Timber.e(e);
+        }
+        return null;
+    }
+
+    public static String getHepTesting(Visit lastVisit, String key) {
+        try {
+            JSONObject jsonObject = new JSONObject(lastVisit.getJson());
+            JSONArray obs = jsonObject.getJSONArray("obs");
+
+            for (int i = 0; i < obs.length(); i++) {
+                JSONObject checkObj = obs.getJSONObject(i);
+                if (checkObj.getString("fieldCode").equalsIgnoreCase(key)) {
+                    JSONArray values = checkObj.getJSONArray("values");
+                    return values.getString(0);
+                }
+            }
+            return getFieldValue(obs, key);
         } catch (Exception e) {
             Timber.e(e);
         }
@@ -248,6 +342,24 @@ public class KvpVisitsUtil extends VisitUtils {
             String hivStatus = getHivStatus(visit);
             if (hivStatus != null && hivStatus.equalsIgnoreCase("positive")) {
                 Event baseEvent = generateHivRegistrationForPositiveKvpClients(visit.getJson(), visit.getBaseEntityId());
+                if (StringUtils.isBlank(baseEvent.getFormSubmissionId()))
+                    baseEvent.setFormSubmissionId(UUID.randomUUID().toString());
+                AllSharedPreferences allSharedPreferences = KvpLibrary.getInstance().context().allSharedPreferences();
+                NCUtil.addEvent(allSharedPreferences, baseEvent);
+                NCUtil.startClientProcessing();
+            }
+
+            if (getHepTesting(visit, "hep_b_testing").equals("yes")) {
+                Event baseEvent = generateHepTestResultsRegistrationEvent(visit.getVisitId() + "-hep_b", visit.getBaseEntityId(), "hep_b", getHepTesting(visit, "hep_b_result"), visit.getDate());
+                if (StringUtils.isBlank(baseEvent.getFormSubmissionId()))
+                    baseEvent.setFormSubmissionId(UUID.randomUUID().toString());
+                AllSharedPreferences allSharedPreferences = KvpLibrary.getInstance().context().allSharedPreferences();
+                NCUtil.addEvent(allSharedPreferences, baseEvent);
+                NCUtil.startClientProcessing();
+            }
+
+            if (getHepTesting(visit, "hep_c_testing").equals("yes")) {
+                Event baseEvent = generateHepTestResultsRegistrationEvent(visit.getVisitId() + "-hep_c", visit.getBaseEntityId(), "hep_c", getHepTesting(visit, "hep_c_result"), visit.getDate());
                 if (StringUtils.isBlank(baseEvent.getFormSubmissionId()))
                     baseEvent.setFormSubmissionId(UUID.randomUUID().toString());
                 AllSharedPreferences allSharedPreferences = KvpLibrary.getInstance().context().allSharedPreferences();

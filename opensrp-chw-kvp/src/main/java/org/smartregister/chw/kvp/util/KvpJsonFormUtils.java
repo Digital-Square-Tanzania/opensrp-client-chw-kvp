@@ -12,9 +12,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.smartregister.chw.kvp.KvpLibrary;
+import org.smartregister.chw.kvp.dao.KvpDao;
 import org.smartregister.chw.kvp.domain.VisitDetail;
 import org.smartregister.chw.kvp.repository.LocationWithTagsRepository;
 import org.smartregister.clientandeventmodel.Event;
+import org.smartregister.dao.AbstractDao;
 import org.smartregister.domain.Location;
 import org.smartregister.domain.LocationTag;
 import org.smartregister.domain.tag.FormTag;
@@ -149,6 +151,13 @@ public class KvpJsonFormUtils extends org.smartregister.util.JsonFormUtils {
         String providerId = allSharedPreferences.fetchRegisteredANM();
         event.setProviderId(providerId);
         event.setLocationId(locationId(allSharedPreferences));
+
+        String syncLocationId = KvpDao.getSyncLocationId(event.getBaseEntityId());
+        if (syncLocationId != null) {
+            // Allows setting the ID for sync purposes
+            event.setLocationId(syncLocationId);
+        }
+
         event.setChildLocationId(allSharedPreferences.fetchCurrentLocality());
         event.setTeam(allSharedPreferences.fetchDefaultTeam(providerId));
         event.setTeamId(allSharedPreferences.fetchDefaultTeamId(providerId));

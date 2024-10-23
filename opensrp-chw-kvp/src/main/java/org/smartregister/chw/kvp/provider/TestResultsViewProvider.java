@@ -1,23 +1,22 @@
 package org.smartregister.chw.kvp.provider;
 
-import static org.smartregister.util.Utils.getName;
+import static org.smartregister.chw.kvp.util.TimeUtils.getElapsedDays;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
-import org.joda.time.Period;
-import org.smartregister.chw.kvp.fragment.BaseKvpRegisterFragment;
+import org.smartregister.chw.kvp.fragment.BaseTestResultsFragment;
 import org.smartregister.chw.kvp.util.DBConstants;
-import org.smartregister.chw.kvp.util.KvpUtil;
 import org.smartregister.commonregistry.CommonPersonObjectClient;
 import org.smartregister.cursoradapter.RecyclerViewProvider;
 import org.smartregister.kvp.R;
@@ -30,11 +29,14 @@ import org.smartregister.view.dialog.SortOption;
 import org.smartregister.view.viewholder.OnClickFormLauncher;
 
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Set;
 
 import timber.log.Timber;
 
-public class KvpRegisterProvider implements RecyclerViewProvider<KvpRegisterProvider.RegisterViewHolder> {
+public class TestResultsViewProvider implements RecyclerViewProvider<TestResultsViewProvider.RegisterViewHolder> {
 
     private final LayoutInflater inflater;
     protected View.OnClickListener onClickListener;
@@ -42,8 +44,7 @@ public class KvpRegisterProvider implements RecyclerViewProvider<KvpRegisterProv
     private Context context;
     private Set<org.smartregister.configurableviews.model.View> visibleColumns;
 
-    public KvpRegisterProvider(Context context, View.OnClickListener paginationClickListener, View.OnClickListener onClickListener, Set visibleColumns) {
-
+    public TestResultsViewProvider(Context context, View.OnClickListener paginationClickListener, View.OnClickListener onClickListener, Set visibleColumns) {
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.paginationClickListener = paginationClickListener;
         this.onClickListener = onClickListener;
@@ -59,65 +60,50 @@ public class KvpRegisterProvider implements RecyclerViewProvider<KvpRegisterProv
         }
     }
 
-    private String updateMemberGender(CommonPersonObjectClient commonPersonObjectClient) {
-        if ("0".equals(Utils.getValue(commonPersonObjectClient.getColumnmaps(), DBConstants.KEY.IS_ANC_CLOSED, false))) {
-            return context.getResources().getString(R.string.anc_string);
-        } else if ("0".equals(Utils.getValue(commonPersonObjectClient.getColumnmaps(), DBConstants.KEY.IS_PNC_CLOSED, false))) {
-            return context.getResources().getString(R.string.pnc_string);
-        } else {
-            String gender = Utils.getValue(commonPersonObjectClient.getColumnmaps(), DBConstants.KEY.GENDER, true);
-            return KvpUtil.getGenderTranslated(context, gender);
-        }
-    }
 
+    @SuppressLint("SetTextI18n")
     private void populatePatientColumn(CommonPersonObjectClient pc, final RegisterViewHolder viewHolder) {
         try {
 
-            String firstName = getName(
-                    Utils.getValue(pc.getColumnmaps(), DBConstants.KEY.FIRST_NAME, true),
-                    Utils.getValue(pc.getColumnmaps(), DBConstants.KEY.MIDDLE_NAME, true));
+            String testType = Utils.getValue(pc.getColumnmaps(), DBConstants.KEY.HEPATITIS_TEST_TYPE, false);
+            String testResult;
 
-            String dobString = Utils.getValue(pc.getColumnmaps(), DBConstants.KEY.DOB, false);
-            int age = new Period(new DateTime(dobString), new DateTime()).getYears();
+            testResult = Utils.getValue(pc.getColumnmaps(), DBConstants.KEY.HEP_TEST_RESULTS, false);
 
-            String patientName = getName(firstName, Utils.getValue(pc.getColumnmaps(), DBConstants.KEY.LAST_NAME, true));
-            viewHolder.patientName.setText(patientName + ", " + age);
-            viewHolder.textViewGender.setText(updateMemberGender(pc));
-            viewHolder.textViewVillage.setText(Utils.getValue(pc.getColumnmaps(), DBConstants.KEY.VILLAGE_TOWN, true));
-            viewHolder.patientColumn.setOnClickListener(onClickListener);
-            viewHolder.patientColumn.setTag(pc);
-            viewHolder.patientColumn.setTag(R.id.VIEW_ID, BaseKvpRegisterFragment.CLICK_VIEW_NORMAL);
 
-            String prepStatus = Utils.getValue(pc.getColumnmaps(), DBConstants.KEY.PrEP_STATUS, false);
-            if (StringUtils.isNotBlank(prepStatus) && !(prepStatus.equalsIgnoreCase("not_initiated") || prepStatus.equalsIgnoreCase("discontinued_quit"))) {
-                String translatedPrepStatusString;
-                switch (prepStatus) {
-                    case "initiated":
-                        translatedPrepStatusString = "Initiated";
-                        break;
-                    case "continuing":
-                        translatedPrepStatusString = "Continuing";
-                        break;
-                    case "re_start":
-                        translatedPrepStatusString = "Re-started";
-                        break;
-                    default:
-                        translatedPrepStatusString = "";  // fallback to the original value if none matches
-                }
-
-                if (StringUtils.isNotBlank(translatedPrepStatusString)) {
-                    viewHolder.tvPrepStatus.setVisibility(View.VISIBLE);
-                    viewHolder.tvPrepStatus.setText(translatedPrepStatusString);
-                } else {
-                    viewHolder.tvPrepStatus.setVisibility(View.GONE);
-                }
-            } else {
-                viewHolder.tvPrepStatus.setVisibility(View.GONE);
+            String testResultDateString = Utils.getValue(pc.getColumnmaps(), DBConstants.KEY.TEST_DATE, false);
+            testResultDateString = testResultDateString.replace("Z", "+0000");
+            Date testResultDate = null;
+            if (StringUtils.isNotBlank(testResultDateString)) {
+                testResultDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.getDefault()).parse(testResultDateString);
             }
 
-            viewHolder.registerColumns.setOnClickListener(onClickListener);
+            if (StringUtils.isBlank(testResult)) {
+                viewHolder.testResultsWrapper.setVisibility(View.GONE);
+                viewHolder.dueWrapper.setVisibility(View.VISIBLE);
+            } else {
+                viewHolder.testResult.setText(testResult);
+                viewHolder.testResultsWrapper.setVisibility(View.VISIBLE);
+                viewHolder.dueWrapper.setVisibility(View.GONE);
 
-            viewHolder.registerColumns.setOnClickListener(v -> viewHolder.patientColumn.performClick());
+                if (testResultDate != null && getElapsedDays(testResultDate) < 30) {
+                    viewHolder.dueWrapper.setVisibility(View.VISIBLE);
+                    viewHolder.recordTestResults.setText(R.string.edit);
+                }
+            }
+
+            viewHolder.testDate.setText(new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(testResultDate));
+
+            if (testType.contains("hep_b"))
+                viewHolder.testType.setText("Hepatitis B");
+            else if (testType.contains("hep_c"))
+                viewHolder.testType.setText("Hepatitis C");
+            else
+                viewHolder.testType.setText(testType);
+
+            viewHolder.recordTestResults.setTag(pc);
+            viewHolder.recordTestResults.setTag(R.id.VIEW_ID, BaseTestResultsFragment.CLICK_VIEW_NORMAL);
+            viewHolder.recordTestResults.setOnClickListener(onClickListener);
 
         } catch (Exception e) {
             Timber.e(e);
@@ -158,7 +144,7 @@ public class KvpRegisterProvider implements RecyclerViewProvider<KvpRegisterProv
 
     @Override
     public RegisterViewHolder createViewHolder(ViewGroup parent) {
-        View view = inflater.inflate(R.layout.kvp_register_list_row, parent, false);
+        View view = inflater.inflate(R.layout.test_result_list_row, parent, false);
         return new RegisterViewHolder(view);
     }
 
@@ -174,27 +160,24 @@ public class KvpRegisterProvider implements RecyclerViewProvider<KvpRegisterProv
     }
 
     public class RegisterViewHolder extends RecyclerView.ViewHolder {
-        public TextView patientName;
-        public TextView parentName;
-        public TextView textViewVillage;
-        public TextView textViewGender;
-        public View patientColumn;
-        public TextView tvPrepStatus;
-
-        public View registerColumns;
+        public TextView testType;
+        public TextView testResult;
+        public TextView testDate;
+        public RelativeLayout testResultsWrapper;
+        public TextView resultTitle;
+        public Button recordTestResults;
         public View dueWrapper;
 
         public RegisterViewHolder(View itemView) {
             super(itemView);
 
-            parentName = itemView.findViewById(R.id.patient_parent_name);
-            patientName = itemView.findViewById(R.id.patient_name_age);
-            textViewVillage = itemView.findViewById(R.id.text_view_village);
-            textViewGender = itemView.findViewById(R.id.text_view_gender);
-            patientColumn = itemView.findViewById(R.id.patient_column);
-            registerColumns = itemView.findViewById(R.id.register_columns);
+            testType = itemView.findViewById(R.id.test_type);
+            testDate = itemView.findViewById(R.id.test_date);
+            testResult = itemView.findViewById(R.id.result);
+            testResultsWrapper = itemView.findViewById(R.id.rlTestResultsWrapper);
+            recordTestResults = itemView.findViewById(R.id.record_test_results_button);
             dueWrapper = itemView.findViewById(R.id.due_button_wrapper);
-            tvPrepStatus = itemView.findViewById(R.id.prep_status);
+            resultTitle = itemView.findViewById(R.id.test_result_title);
         }
     }
 

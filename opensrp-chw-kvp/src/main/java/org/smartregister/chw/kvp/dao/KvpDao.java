@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import timber.log.Timber;
+
 public class KvpDao extends AbstractDao {
 
 
@@ -25,6 +27,26 @@ public class KvpDao extends AbstractDao {
             return false;
 
         return res.get(0) > 0;
+    }
+
+    public static boolean hasTestResults(String baseEntityID) {
+        String sql = "SELECT  test_type  FROM " + Constants.TABLES.KVP_HEPATITIS_TEST_RESULTS + " WHERE entity_id = '" + baseEntityID + "' AND test_type IS NOT NULL ORDER BY last_interacted_with DESC LIMIT 1";
+
+        DataMap<String> testTypeDataMap = cursor -> getCursorValue(cursor, "test_type");
+
+        List<String> testTypeRes = readData(sql, testTypeDataMap);
+
+        return testTypeRes != null && !testTypeRes.isEmpty();
+    }
+
+    public static boolean hasPrepTestResults(String baseEntityID) {
+        String sql = "SELECT  test_type  FROM " + Constants.TABLES.PREP_HEPATITIS_AND_CRCL_TEST_RESULTS + " WHERE entity_id = '" + baseEntityID + "' AND test_type IS NOT NULL ORDER BY last_interacted_with DESC LIMIT 1";
+
+        DataMap<String> testTypeDataMap = cursor -> getCursorValue(cursor, "test_type");
+
+        List<String> testTypeRes = readData(sql, testTypeDataMap);
+
+        return testTypeRes != null && !testTypeRes.isEmpty();
     }
 
     public static boolean isRegisteredForKvp(String baseEntityID) {
@@ -185,7 +207,7 @@ public class KvpDao extends AbstractDao {
     public static MemberObject getKvpMember(String baseEntityID) {
         String sql = "select m.base_entity_id,\n" +
                 "       m.unique_id,\n" +
-                "       m.relational_id,\n" +
+                "       m.relational_id as family_base_entity_id,\n" +
                 "       m.dob,\n" +
                 "       m.first_name,\n" +
                 "       m.middle_name,\n" +
@@ -228,8 +250,8 @@ public class KvpDao extends AbstractDao {
             memberObject.setGender(getCursorValue(cursor, "gender"));
             memberObject.setUniqueId(getCursorValue(cursor, "unique_id", ""));
             memberObject.setDob(getCursorValue(cursor, "dob"));
-            memberObject.setFamilyBaseEntityId(getCursorValue(cursor, "relational_id", ""));
-            memberObject.setRelationalId(getCursorValue(cursor, "relational_id", ""));
+            memberObject.setFamilyBaseEntityId(getCursorValue(cursor, "family_base_entity_id", ""));
+            memberObject.setRelationalId(getCursorValue(cursor, "family_base_entity_id", ""));
             memberObject.setPrimaryCareGiver(getCursorValue(cursor, "primary_caregiver"));
             memberObject.setFamilyName(getCursorValue(cursor, "family_name", ""));
             memberObject.setPhoneNumber(getCursorValue(cursor, "phone_number", ""));
@@ -268,7 +290,7 @@ public class KvpDao extends AbstractDao {
     public static MemberObject getPrEPMember(String baseEntityID) {
         String sql = "select m.base_entity_id,\n" +
                 "       m.unique_id,\n" +
-                "       m.relational_id,\n" +
+                "       m.relational_id as family_base_entity_id,\n" +
                 "       m.dob,\n" +
                 "       m.first_name,\n" +
                 "       m.middle_name,\n" +
@@ -311,7 +333,7 @@ public class KvpDao extends AbstractDao {
             memberObject.setGender(getCursorValue(cursor, "gender"));
             memberObject.setUniqueId(getCursorValue(cursor, "unique_id", ""));
             memberObject.setDob(getCursorValue(cursor, "dob"));
-            memberObject.setFamilyBaseEntityId(getCursorValue(cursor, "relational_id", ""));
+            memberObject.setFamilyBaseEntityId(getCursorValue(cursor, "family_base_entity_id", ""));
             memberObject.setRelationalId(getCursorValue(cursor, "relational_id", ""));
             memberObject.setPrimaryCareGiver(getCursorValue(cursor, "primary_caregiver"));
             memberObject.setFamilyName(getCursorValue(cursor, "family_name", ""));
@@ -427,5 +449,21 @@ public class KvpDao extends AbstractDao {
             return res.get(0);
         }
         return null;
+    }
+
+    public static String getSyncLocationId(String baseEntityId) {
+        try {
+            String sql = String.format("SELECT sync_location_id FROM ec_family_member WHERE base_entity_id = '%s'", baseEntityId);
+            DataMap<String> dataMap = cursor -> getCursorValue(cursor, "sync_location_id");
+            List<String> res = readData(sql, dataMap);
+
+            if (res == null || res.size() != 1)
+                return null;
+
+            return res.get(0);
+        } catch (Exception e) {
+            Timber.e(e);
+            return null;
+        }
     }
 }

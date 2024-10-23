@@ -44,6 +44,11 @@ public interface Constants {
         String KVP_SCREENING_MALE = "kvp_screening_male";
         String KVP_SCREENING_FEMALE = "kvp_screening_female";
         String PrEP_REGISTRATION = "prep_registration";
+        String HEPATITIS_B_RESULTS = "kvp_hepatitis_b_results";
+        String HEPATITIS_C_RESULTS = "kvp_hepatitis_c_results";
+        String PREP_CRCL_RESULTS = "prep_crcl_results";
+        String PREP_HBV_RESULTS = "prep_hbv_results";
+        String PREP_HCV_RESULTS = "prep_hcv_results";
     }
 
     interface KVP_PrEP_FOLLOWUP_FORMS {
@@ -94,6 +99,8 @@ public interface Constants {
         String KVP_FOLLOW_UP = "ec_kvp_followup";
         String PrEP_FOLLOWUP = "ec_prep_followup";
         String FAMILY_MEMBER_TABLE = "ec_family_member";
+        String KVP_HEPATITIS_TEST_RESULTS = "ec_kvp_hepatitis_test_results";
+        String PREP_HEPATITIS_AND_CRCL_TEST_RESULTS = "ec_prep_hepatitis_and_crcl_test_results";
     }
 
     interface ACTIVITY_PAYLOAD {
@@ -101,6 +108,7 @@ public interface Constants {
         String FAMILY_BASE_ENTITY_ID = "FAMILY_BASE_ENTITY_ID";
         String ACTION = "ACTION";
         String KVP_FORM_NAME = "KVP_FORM_NAME";
+        String PARENT_FORM_ENTITY_ID = "PARENT_FORM_ENTITY_ID";
         String MEMBER_PROFILE_OBJECT = "MemberObject";
         String EDIT_MODE = "editMode";
         String GENDER = "gender";
