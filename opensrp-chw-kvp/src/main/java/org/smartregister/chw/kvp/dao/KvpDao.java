@@ -64,12 +64,12 @@ public class KvpDao extends AbstractDao {
 
     public static boolean isRegisteredForPrEP(String baseEntityID) {
         String sql = "SELECT count(p.base_entity_id) count FROM ec_prep_register p " +
-                "WHERE p.base_entity_id = '" + baseEntityID + "'";
+                "WHERE p.base_entity_id = '" + baseEntityID + "' AND p.agreed_to_use_prep = 'yes'";
 
         DataMap<Integer> dataMap = cursor -> getCursorIntValue(cursor, "count");
 
         List<Integer> res = readData(sql, dataMap);
-        if (res != null && res.size() != 0 && res.get(0) != null) {
+        if (res != null && !res.isEmpty() && res.get(0) != null) {
             return res.get(0) > 0;
         }
         return false;
