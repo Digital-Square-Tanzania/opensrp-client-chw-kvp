@@ -214,7 +214,9 @@ public class KvpVisitsUtil extends VisitUtils {
             //completionObject.put("is-mat-done", computeCompletionStatus(obs, "mat_provided"));
 
             if (gender.equalsIgnoreCase(Constants.MALE)) {
-                completionObject.put("is-vmmc-done", computeCompletionStatus(obs, "vmcc_provided"));
+                String vmmcServices = KvpDao.getKvpVmmcServices(baseEntityId);
+                if (StringUtils.isBlank(vmmcServices) || vmmcServices.equalsIgnoreCase("not_provided"))
+                    completionObject.put("is-vmmc-done", computeCompletionStatus(obs, "vmcc_provided"));
             } else {
                 completionObject.put("is-cervical_cancer_screening-done", computeCompletionStatus(obs, "cervical_cancer_screening"));
             }
