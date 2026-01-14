@@ -36,7 +36,7 @@ import org.smartregister.chw.kvp.util.KvpVisitsUtil;
 import org.smartregister.chw.kvp.util.PrEPVisitsUtil;
 import org.smartregister.domain.AlertStatus;
 import org.smartregister.helper.ImageRenderHelper;
-import org.smartregister.kvp.R;
+import org.smartregister.chw.kvp.R;
 import org.smartregister.view.activity.BaseProfileActivity;
 
 import java.text.SimpleDateFormat;

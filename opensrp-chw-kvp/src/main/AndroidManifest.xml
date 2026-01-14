@@ -1,4 +1,4 @@
-<manifest package="org.smartregister.kvp"
+<manifest package="org.smartregister.chw.kvp"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />

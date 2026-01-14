@@ -19,7 +19,7 @@ import org.smartregister.chw.kvp.domain.Visit;
 import org.smartregister.chw.kvp.handlers.BaseServiceActionHandler;
 import org.smartregister.chw.kvp.util.Constants;
 import org.smartregister.chw.kvp.util.KvpVisitsUtil;
-import org.smartregister.kvp.R;
+import org.smartregister.chw.kvp.R;
 import org.smartregister.view.activity.SecuredActivity;
 
 import java.text.MessageFormat;

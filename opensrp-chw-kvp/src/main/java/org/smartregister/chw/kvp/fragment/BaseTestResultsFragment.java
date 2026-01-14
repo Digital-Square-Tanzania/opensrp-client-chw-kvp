@@ -9,7 +9,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import org.smartregister.chw.kvp.model.BaseTestResultsFragmentModel;
 import org.smartregister.chw.kvp.presenter.BaseTestResultsFragmentPresenter;
-import org.smartregister.kvp.R;
+import org.smartregister.chw.kvp.R;
 import org.smartregister.chw.kvp.contract.TestResultsFragmentContract;
 import org.smartregister.chw.kvp.provider.TestResultsViewProvider;
 import org.smartregister.commonregistry.CommonPersonObjectClient;

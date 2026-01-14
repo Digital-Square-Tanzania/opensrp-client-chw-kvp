@@ -12,7 +12,7 @@ import org.smartregister.chw.kvp.domain.ServiceCard;
 import org.smartregister.chw.kvp.domain.Visit;
 import org.smartregister.chw.kvp.util.Constants;
 import org.smartregister.chw.kvp.util.KvpVisitsUtil;
-import org.smartregister.kvp.R;
+import org.smartregister.chw.kvp.R;
 
 public class BaseServiceActionHandler implements View.OnClickListener {
 

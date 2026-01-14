@@ -15,7 +15,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import org.smartregister.chw.kvp.domain.MemberObject;
 import org.smartregister.chw.kvp.fragment.BaseKvpCallDialogFragment;
 import org.smartregister.chw.kvp.listener.OnClickFloatingMenu;
-import org.smartregister.kvp.R;
+import org.smartregister.chw.kvp.R;
 
 public class BaseKvpFloatingMenu extends LinearLayout implements View.OnClickListener {
     public FloatingActionButton fab;

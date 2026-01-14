@@ -20,7 +20,7 @@ import org.smartregister.chw.kvp.util.DBConstants;
 import org.smartregister.chw.kvp.util.KvpUtil;
 import org.smartregister.commonregistry.CommonPersonObjectClient;
 import org.smartregister.cursoradapter.RecyclerViewProvider;
-import org.smartregister.kvp.R;
+import org.smartregister.chw.kvp.R;
 import org.smartregister.util.Utils;
 import org.smartregister.view.contract.SmartRegisterClient;
 import org.smartregister.view.contract.SmartRegisterClients;

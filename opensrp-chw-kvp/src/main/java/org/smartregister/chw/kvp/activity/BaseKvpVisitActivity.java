@@ -24,7 +24,7 @@ import org.smartregister.chw.kvp.interactor.BaseKvpVisitInteractor;
 import org.smartregister.chw.kvp.model.BaseKvpVisitAction;
 import org.smartregister.chw.kvp.presenter.BaseKvpVisitPresenter;
 import org.smartregister.chw.kvp.util.Constants;
-import org.smartregister.kvp.R;
+import org.smartregister.chw.kvp.R;
 import org.smartregister.view.activity.SecuredActivity;
 
 import java.text.MessageFormat;

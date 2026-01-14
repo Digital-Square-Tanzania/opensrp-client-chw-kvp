@@ -17,7 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.smartregister.chw.kvp.contract.BaseKvpCallDialogContract;
 import org.smartregister.chw.kvp.domain.MemberObject;
 import org.smartregister.chw.kvp.listener.BaseKvpCallWidgetDialogListener;
-import org.smartregister.kvp.R;
+import org.smartregister.chw.kvp.R;
 
 import static android.view.View.GONE;
 import static org.smartregister.util.Utils.getName;

@@ -5,7 +5,7 @@ import android.util.Log;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.smartregister.chw.kvp.contract.KvpRegisterContract;
-import org.smartregister.kvp.R;
+import org.smartregister.chw.kvp.R;
 
 import java.lang.ref.WeakReference;
 import java.util.List;

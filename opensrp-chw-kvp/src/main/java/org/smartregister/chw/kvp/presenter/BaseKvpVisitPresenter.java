@@ -5,7 +5,7 @@ import org.smartregister.chw.kvp.contract.BaseKvpVisitContract;
 import org.smartregister.chw.kvp.domain.MemberObject;
 import org.smartregister.chw.kvp.model.BaseKvpVisitAction;
 import org.smartregister.chw.kvp.util.KvpJsonFormUtils;
-import org.smartregister.kvp.R;
+import org.smartregister.chw.kvp.R;
 import org.smartregister.util.FormUtils;
 
 import java.lang.ref.WeakReference;

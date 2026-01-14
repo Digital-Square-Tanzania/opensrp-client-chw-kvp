@@ -12,7 +12,7 @@ import android.widget.Toast;
 
 import org.jetbrains.annotations.NotNull;
 import org.smartregister.chw.kvp.domain.ServiceCard;
-import org.smartregister.kvp.R;
+import org.smartregister.chw.kvp.R;
 
 import java.util.List;
 

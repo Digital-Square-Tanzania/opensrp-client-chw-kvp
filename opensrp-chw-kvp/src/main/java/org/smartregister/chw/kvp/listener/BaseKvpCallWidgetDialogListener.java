@@ -5,7 +5,7 @@ import android.view.View;
 
 import org.smartregister.chw.kvp.fragment.BaseKvpCallDialogFragment;
 import org.smartregister.chw.kvp.util.KvpUtil;
-import org.smartregister.kvp.R;
+import org.smartregister.chw.kvp.R;
 
 import timber.log.Timber;
 

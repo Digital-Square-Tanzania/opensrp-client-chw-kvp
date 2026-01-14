@@ -4,7 +4,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import org.json.JSONObject;
 import org.smartregister.chw.kvp.fragment.BaseTestResultsFragment;
-import org.smartregister.kvp.R;
+import org.smartregister.chw.kvp.R;
 import org.smartregister.view.activity.SecuredActivity;
 
 public class BaseTestResultsViewActivity extends SecuredActivity {

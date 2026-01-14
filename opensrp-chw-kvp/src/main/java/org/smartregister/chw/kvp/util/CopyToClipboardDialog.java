@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
 
-import org.smartregister.kvp.R;
+import org.smartregister.chw.kvp.R;
 
 import timber.log.Timber;
 

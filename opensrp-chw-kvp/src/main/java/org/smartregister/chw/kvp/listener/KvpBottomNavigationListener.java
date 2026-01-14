@@ -3,7 +3,7 @@ package org.smartregister.chw.kvp.listener;
 import android.app.Activity;
 import android.view.MenuItem;
 
-import org.smartregister.kvp.R;
+import org.smartregister.chw.kvp.R;
 import org.smartregister.listener.BottomNavigationListener;
 import org.smartregister.view.activity.BaseRegisterActivity;
 

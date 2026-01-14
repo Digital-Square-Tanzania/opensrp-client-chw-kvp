@@ -24,7 +24,7 @@ import org.smartregister.chw.kvp.util.DBConstants;
 import org.smartregister.chw.kvp.util.KvpJsonFormUtils;
 import org.smartregister.chw.kvp.util.KvpUtil;
 import org.smartregister.helper.BottomNavigationHelper;
-import org.smartregister.kvp.R;
+import org.smartregister.chw.kvp.R;
 import org.smartregister.listener.BottomNavigationListener;
 import org.smartregister.repository.BaseRepository;
 import org.smartregister.util.Utils;

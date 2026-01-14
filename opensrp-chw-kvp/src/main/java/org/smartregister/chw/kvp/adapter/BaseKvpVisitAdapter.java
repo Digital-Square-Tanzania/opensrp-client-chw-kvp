@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.smartregister.chw.kvp.contract.BaseKvpVisitContract;
 import org.smartregister.chw.kvp.model.BaseKvpVisitAction;
-import org.smartregister.kvp.R;
+import org.smartregister.chw.kvp.R;
 
 import java.text.MessageFormat;
 import java.util.LinkedHashMap;
