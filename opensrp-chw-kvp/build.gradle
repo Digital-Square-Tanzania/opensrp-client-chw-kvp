@@ -28,7 +28,7 @@ if (rootProject.file("github.properties").exists()) {
 description = 'OpenSRP chw kvp library'
 
 jacoco {
-    toolVersion = "0.8.0"
+    toolVersion = "0.8.10"
 }
 
 allprojects {
@@ -54,10 +54,12 @@ allprojects {
 android {
     compileSdkVersion androidCompileSdkVersion
     buildToolsVersion androidBuildToolsVersion
+    ndkVersion "21.1.6352462"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled true
     }
 
     defaultConfig {
@@ -114,6 +116,12 @@ android {
 
 tasks.withType(Test) {
     jacoco.includeNoLocationClasses = true
+    if (JavaVersion.current().isJava9Compatible()) {
+        jvmArgs '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+                '--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED',
+                '--add-opens', 'java.base/java.io=ALL-UNNAMED',
+                '--add-opens', 'java.base/jdk.internal.reflect=ALL-UNNAMED'
+    }
 }
 
 
@@ -262,11 +270,12 @@ dependencies {
         resolutionStrategy.force 'com.android.support:support-annotations:23.1.0'
     }
     // PowerMock
-    def powerMockVersion = '1.7.1'
+    def powerMockVersion = '2.0.9'
     testImplementation "org.powermock:powermock-module-junit4:$powerMockVersion"
     testImplementation "org.powermock:powermock-module-junit4-rule:$powerMockVersion"
     testImplementation "org.powermock:powermock-api-mockito2:$powerMockVersion"
     testImplementation "org.powermock:powermock-classloading-xstream:$powerMockVersion"
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
 }
 
 task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest']) {
@@ -283,11 +292,11 @@ task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest']) {
     def debugTree = fileTree(dir: "$project.buildDir/intermediates/javac/debug/classes", excludes: fileFilter)
     def mainSrc = "$project.projectDir/src/main/java"
 
-    sourceDirectories = files([mainSrc])
-    classDirectories = files([debugTree])
-    executionData = fileTree(dir: project.buildDir, includes: [
+    sourceDirectories.setFrom(files(mainSrc))
+    classDirectories.setFrom(files(debugTree))
+    executionData.setFrom(fileTree(dir: project.buildDir, includes: [
             'jacoco/testDebugUnitTest.exec', 'outputs/code-coverage/connected/*coverage.ec'
-    ])
+    ]))
 }
 
 coveralls {
