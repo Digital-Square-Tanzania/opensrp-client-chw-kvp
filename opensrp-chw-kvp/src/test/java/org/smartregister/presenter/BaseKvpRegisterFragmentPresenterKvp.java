@@ -6,10 +6,12 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.ArgumentCaptor;
 import org.smartregister.chw.kvp.contract.KvpRegisterFragmentContract;
 import org.smartregister.chw.kvp.presenter.BaseKvpRegisterFragmentPresenter;
 import org.smartregister.chw.kvp.util.Constants;
 import org.smartregister.chw.kvp.util.DBConstants;
+import org.smartregister.configurableviews.model.RegisterConfiguration;
 import org.smartregister.configurableviews.model.View;
 
 import java.util.Set;
@@ -27,6 +29,7 @@ public class BaseKvpRegisterFragmentPresenterKvp {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        Mockito.when(model.defaultRegisterConfiguration()).thenReturn(new RegisterConfiguration());
 
         baseKvpRegisterFragmentPresenter = new BaseKvpRegisterFragmentPresenter(view, model, "");
     }
@@ -38,7 +41,8 @@ public class BaseKvpRegisterFragmentPresenterKvp {
 
     @Test
     public void getMainCondition() {
-        Assert.assertEquals("", baseKvpRegisterFragmentPresenter.getMainCondition());
+        Assert.assertEquals(Constants.TABLES.KVP_PrEP_REGISTER + "." + DBConstants.KEY.IS_CLOSED + " IS 0",
+                baseKvpRegisterFragmentPresenter.getMainCondition());
     }
 
     @Test
@@ -59,10 +63,15 @@ public class BaseKvpRegisterFragmentPresenterKvp {
     @Test
     public void initializeQueries() {
         Set<View> visibleColumns = new TreeSet<>();
+        Mockito.when(model.countSelect(Mockito.anyString(), Mockito.anyString())).thenReturn("countSelect");
+        Mockito.when(model.mainSelect(Mockito.anyString(), Mockito.anyString())).thenReturn("mainSelect");
+
         baseKvpRegisterFragmentPresenter.initializeQueries(null);
-        Mockito.doNothing().when(view).initializeQueryParams("ec_kvp_confirmation", null, null);
-        Mockito.verify(view).initializeQueryParams("ec_kvp_confirmation", null, null);
-        Mockito.verify(view).initializeAdapter(visibleColumns);
+
+        Mockito.verify(view).initializeQueryParams(Constants.TABLES.KVP_PrEP_REGISTER, "countSelect", "mainSelect");
+        ArgumentCaptor<Set> captor = ArgumentCaptor.forClass(Set.class);
+        Mockito.verify(view).initializeAdapter(captor.capture());
+        Assert.assertEquals(visibleColumns, captor.getValue());
         Mockito.verify(view).countExecute();
         Mockito.verify(view).filterandSortInInitializeQueries();
     }

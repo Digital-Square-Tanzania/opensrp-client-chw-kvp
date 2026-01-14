@@ -16,13 +16,12 @@ import org.powermock.reflect.Whitebox;
 import org.smartregister.chw.kvp.activity.BaseKvpProfileActivity;
 import org.smartregister.chw.kvp.contract.KvpProfileContract;
 import org.smartregister.domain.AlertStatus;
-import org.smartregister.kvp.R;
+import org.smartregister.chw.kvp.R;
 
 import static org.mockito.Mockito.validateMockitoUsage;
 
 public class BaseTestProfileActivityKvp {
-    @Mock
-    public BaseKvpProfileActivity baseKvpProfileActivity;
+    private BaseKvpProfileActivity baseKvpProfileActivity;
 
     @Mock
     public KvpProfileContract.Presenter profilePresenter;
@@ -33,6 +32,7 @@ public class BaseTestProfileActivityKvp {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        baseKvpProfileActivity = Mockito.mock(BaseKvpProfileActivity.class);
     }
 
     @After
@@ -53,7 +53,7 @@ public class BaseTestProfileActivityKvp {
 
     @Test
     public void formatTime() {
-        BaseKvpProfileActivity activity = new BaseKvpProfileActivity();
+        BaseKvpProfileActivity activity = Mockito.mock(BaseKvpProfileActivity.class, Mockito.CALLS_REAL_METHODS);
         try {
             Assert.assertEquals("25 Oct 2019", Whitebox.invokeMethod(activity, "formatTime", "25-10-2019"));
         } catch (Exception e) {
@@ -81,7 +81,7 @@ public class BaseTestProfileActivityKvp {
 
     @Test
     public void onClickBackPressed() {
-        baseKvpProfileActivity = Mockito.spy(new BaseKvpProfileActivity());
+        BaseKvpProfileActivity baseKvpProfileActivity = Mockito.mock(BaseKvpProfileActivity.class, Mockito.CALLS_REAL_METHODS);
         Mockito.when(view.getId()).thenReturn(R.id.title_layout);
         Mockito.doNothing().when(baseKvpProfileActivity).onBackPressed();
         baseKvpProfileActivity.onClick(view);
@@ -90,7 +90,7 @@ public class BaseTestProfileActivityKvp {
 
     @Test
     public void onClickOpenMedicalHistory() {
-        baseKvpProfileActivity = Mockito.spy(new BaseKvpProfileActivity());
+        BaseKvpProfileActivity baseKvpProfileActivity = Mockito.mock(BaseKvpProfileActivity.class, Mockito.CALLS_REAL_METHODS);
         Mockito.when(view.getId()).thenReturn(R.id.rlLastVisit);
         Mockito.doNothing().when(baseKvpProfileActivity).openMedicalHistory();
         baseKvpProfileActivity.onClick(view);
@@ -99,7 +99,7 @@ public class BaseTestProfileActivityKvp {
 
     @Test
     public void onClickOpenUpcomingServices() {
-        baseKvpProfileActivity = Mockito.spy(new BaseKvpProfileActivity());
+        BaseKvpProfileActivity baseKvpProfileActivity = Mockito.mock(BaseKvpProfileActivity.class, Mockito.CALLS_REAL_METHODS);
         Mockito.when(view.getId()).thenReturn(R.id.rlUpcomingServices);
         Mockito.doNothing().when(baseKvpProfileActivity).openUpcomingService();
         baseKvpProfileActivity.onClick(view);
@@ -108,7 +108,7 @@ public class BaseTestProfileActivityKvp {
 
     @Test
     public void onClickOpenFamlilyServicesDue() {
-        baseKvpProfileActivity = Mockito.spy(new BaseKvpProfileActivity());
+        BaseKvpProfileActivity baseKvpProfileActivity = Mockito.mock(BaseKvpProfileActivity.class, Mockito.CALLS_REAL_METHODS);
         Mockito.when(view.getId()).thenReturn(R.id.rlFamilyServicesDue);
         Mockito.doNothing().when(baseKvpProfileActivity).openFamilyDueServices();
         baseKvpProfileActivity.onClick(view);
@@ -117,7 +117,7 @@ public class BaseTestProfileActivityKvp {
 
     @Test(expected = Exception.class)
     public void refreshFamilyStatusComplete() throws Exception {
-        baseKvpProfileActivity = Mockito.spy(new BaseKvpProfileActivity());
+        BaseKvpProfileActivity baseKvpProfileActivity = Mockito.mock(BaseKvpProfileActivity.class, Mockito.CALLS_REAL_METHODS);
         TextView textView = view.findViewById(R.id.textview_family_has);
         Whitebox.setInternalState(baseKvpProfileActivity, "tvFamilyStatus", textView);
         Mockito.doNothing().when(baseKvpProfileActivity).showProgressBar(false);
@@ -128,7 +128,7 @@ public class BaseTestProfileActivityKvp {
 
     @Test(expected = Exception.class)
     public void refreshFamilyStatusNormal() throws Exception {
-        baseKvpProfileActivity = Mockito.spy(new BaseKvpProfileActivity());
+        BaseKvpProfileActivity baseKvpProfileActivity = Mockito.mock(BaseKvpProfileActivity.class, Mockito.CALLS_REAL_METHODS);
         TextView textView = view.findViewById(R.id.textview_family_has);
         Whitebox.setInternalState(baseKvpProfileActivity, "tvFamilyStatus", textView);
         Mockito.doNothing().when(baseKvpProfileActivity).showProgressBar(false);
@@ -139,7 +139,7 @@ public class BaseTestProfileActivityKvp {
 
     @Test(expected = Exception.class)
     public void onActivityResult() throws Exception {
-        baseKvpProfileActivity = Mockito.spy(new BaseKvpProfileActivity());
+        BaseKvpProfileActivity baseKvpProfileActivity = Mockito.mock(BaseKvpProfileActivity.class, Mockito.CALLS_REAL_METHODS);
         Whitebox.invokeMethod(baseKvpProfileActivity, "onActivityResult", 2244, -1, null);
         Mockito.verify(profilePresenter).saveForm(null);
     }

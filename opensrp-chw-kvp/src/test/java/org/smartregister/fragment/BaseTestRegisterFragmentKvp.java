@@ -29,7 +29,7 @@ public class BaseTestRegisterFragmentKvp {
         Whitebox.invokeMethod(baseKvpRegisterFragment, "openProfile", client);
         PowerMockito.mockStatic(BaseKvpProfileActivity.class);
         BaseKvpProfileActivity.startProfileActivity(null, null);
-        PowerMockito.verifyStatic(times(1));
-
+        PowerMockito.verifyStatic(BaseKvpProfileActivity.class, times(1));
+        BaseKvpProfileActivity.startProfileActivity(null, null);
     }
 }
