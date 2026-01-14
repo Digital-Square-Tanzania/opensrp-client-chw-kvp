@@ -20,6 +20,7 @@
     <string name="return_to_prep_clients">Return all PrEP Clients</string>
     <string name="return_to_kvp_prep_clients">Return all KVP/PrEP Clients</string>
     <string name="last_visit_40_days_ago">Last visit %1$s ago</string>
+    <string name="medical_history">Medical history</string>
     <string name="view_medical_history">View medical history</string>
     <string name="call_no_number_provided">(no number provided)</string>
     <string name="view_upcoming_services">View upcoming services</string>

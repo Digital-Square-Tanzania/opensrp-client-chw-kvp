@@ -26,4 +26,9 @@
         <item name="android:windowMinWidthMinor">98%</item>
         <item name="android:background">@android:color/white</item>
     </style>
+
+    <style name="CustomFontTextViewStyle.ListView.Normal.MultipleLines.Extended"
+        parent="CustomFontTextViewStyle.ListView.Normal.MultipleLines">
+        <item name="android:maxLines">4</item>
+    </style>
 </resources>

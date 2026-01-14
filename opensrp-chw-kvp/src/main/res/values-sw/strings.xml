@@ -18,6 +18,7 @@
     <string name="return_to_prep_clients">Rudi kwenye wateja wote wa PrEP</string>
     <string name="return_to_kvp_prep_clients">Rudi kwenye wateja wote wa KVP/PrEP</string>
     <string name="last_visit_40_days_ago">Tembeleo la mwisho %1$s uliyopita</string>
+    <string name="medical_history">Historia ya afya</string>
     <string name="view_medical_history">Angalia historia ya huduma</string>
     <string name="call_no_number_provided">(Hakuna namba iliyotolewa)</string>
     <string name="view_upcoming_services">Angalia huduma zinazokaribia</string>
@@ -86,4 +87,3 @@
     <string name="prep_visit_conducted">Hudhurio la dawa kinga limechukuliwa</string>
 
 </resources>
-
