@@ -1,6 +1,6 @@
 package org.smartregister.chw.kvp.repository;
 
-import net.sqlcipher.Cursor;
+import android.database.Cursor;
 
 import org.smartregister.domain.Location;
 import org.smartregister.domain.LocationTag;
