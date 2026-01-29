@@ -65,6 +65,7 @@ subprojects {
     }
     configurations.all {
         exclude group: 'com.google.guava', module: 'listenablefuture'
+        resolutionStrategy.force 'net.zetetic:sqlcipher-android:4.5.4'
     }
 }
 
