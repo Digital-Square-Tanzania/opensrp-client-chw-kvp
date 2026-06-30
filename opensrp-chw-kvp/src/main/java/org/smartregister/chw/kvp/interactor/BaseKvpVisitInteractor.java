@@ -35,8 +35,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import androidx.annotation.VisibleForTesting;
+
 import timber.log.Timber;
 
 public class BaseKvpVisitInteractor implements BaseKvpVisitContract.Interactor {
@@ -59,13 +61,14 @@ public class BaseKvpVisitInteractor implements BaseKvpVisitContract.Interactor {
     public BaseKvpVisitInteractor() {
         this(new AppExecutors(), KvpLibrary.getInstance().getEcSyncHelper());
     }
+
     public BaseKvpVisitInteractor(String visitType) {
         this(new AppExecutors(), KvpLibrary.getInstance().getEcSyncHelper());
         this.visitType = visitType;
     }
 
     protected String getCurrentVisitType() {
-        if(StringUtils.isNotBlank(visitType)){
+        if (StringUtils.isNotBlank(visitType)) {
             return visitType;
         }
         return Constants.EVENT_TYPE.KVP_PrEP_FOLLOW_UP_VISIT;
@@ -309,27 +312,30 @@ public class BaseKvpVisitInteractor implements BaseKvpVisitContract.Interactor {
         AllSharedPreferences allSharedPreferences = KvpLibrary.getInstance().context().allSharedPreferences();
         Visit visit = visitRepository().getVisitByVisitId(visitID);
         if (visit == null || !visit.getProcessed()) return;
-        //TODO: implement if needed
+
+        Event processedEvent = HpsDao.getEventByFormSubmissionId(visit.getFormSubmissionId());
+        if (processedEvent == null) return;
+
+        deleteSavedEvent(allSharedPreferences, baseEntityId, processedEvent.getEventId(), processedEvent.getFormSubmissionId(), "event");
+        HpsLibrary.getInstance().visitRepository().deleteVisit(visitID);
     }
 
     protected void deleteSavedEvent(AllSharedPreferences allSharedPreferences, String baseEntityId, String eventId, String formSubmissionId, String type) {
         Event event = (Event) new Event()
                 .withBaseEntityId(baseEntityId)
                 .withEventDate(new Date())
-                .withEventType(Constants.EVENT_TYPE.VOID_EVENT)
-                .withLocationId(KvpJsonFormUtils.locationId(allSharedPreferences))
+                .withEventType(Constants.EVENT_TYPE.DELETE_EVENT)
+                .withLocationId(HpsJsonFormUtils.locationId(allSharedPreferences))
                 .withProviderId(allSharedPreferences.fetchRegisteredANM())
                 .withEntityType(type)
-                .withFormSubmissionId(formSubmissionId)
-                .withVoided(true)
-                .withVoider(new User(null, allSharedPreferences.fetchRegisteredANM(), null, null))
-                .withVoidReason("Edited Event")
-                .withDateVoided(new Date());
+                .withFormSubmissionId(UUID.randomUUID().toString())
+                .withDateCreated(new Date());
 
-        event.setSyncStatus(SyncStatus.PENDING.value());
+        event.addDetails(Constants.JSON_FORM_EXTRA.DELETE_EVENT_ID, eventId);
+        event.addDetails(Constants.JSON_FORM_EXTRA.DELETE_FORM_SUBMISSION_ID, formSubmissionId);
 
         try {
-            syncHelper.addEvent(event.getBaseEntityId(), new JSONObject(KvpJsonFormUtils.gson.toJson(event)));
+            syncHelper.addEvent(event.getBaseEntityId(), new JSONObject(HpsJsonFormUtils.gson.toJson(event)));
         } catch (Exception e) {
             Timber.e(e);
         }

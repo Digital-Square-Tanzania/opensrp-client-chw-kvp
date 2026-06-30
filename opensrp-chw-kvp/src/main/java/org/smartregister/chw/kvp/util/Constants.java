@@ -22,6 +22,8 @@ public interface Constants {
     interface JSON_FORM_EXTRA {
         String JSON = "json";
         String ENCOUNTER_TYPE = "encounter_type";
+        String DELETE_EVENT_ID = "deleted_event_id";
+        String DELETE_FORM_SUBMISSION_ID = "deleted_form_submission_id";
     }
 
     interface EVENT_TYPE {
