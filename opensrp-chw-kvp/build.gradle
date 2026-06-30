@@ -3,9 +3,10 @@ buildscript {
     repositories {
         google()
         jcenter()
+        mavenCentral()
     }
     dependencies {
-        classpath ('com.android.tools.build:gradle:4.1.3'){
+        classpath ('com.android.tools.build:gradle:4.2.2'){
             transitive = true
             exclude group: 'org.apache.httpcomponents', module: 'httpmime'
         }
@@ -36,6 +37,7 @@ allprojects {
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
         maven { url "https://s3.amazonaws.com/repo.commonsware.com" }
         mavenLocal()
+        mavenCentral()
 
         maven {
 
@@ -199,6 +201,7 @@ allprojects {
     repositories {
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
         mavenLocal()
+        mavenCentral()
         maven {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/SoftmedTanzania/opensrp-client-core")
@@ -219,7 +222,7 @@ allprojects {
     }
 }
 dependencies {
-    implementation('org.smartregister:opensrp-client-core:1.16.5-NACP-SNAPSHOT@aar') {
+    implementation('org.smartregister:opensrp-client-core:1.18.0-MOH-SNAPSHOT@aar') {
         transitive = true
         exclude group: 'com.github.bmelnychuk', module: 'atv'
         exclude group: 'com.google.guava', module: 'guava'
@@ -245,6 +248,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'appcompat-v7'
     }
 
+    implementation 'net.zetetic:sqlcipher-android:4.5.4'
     implementation group: 'id.zelory', name: 'compressor', version: '3.0.1'
     implementation 'androidx.appcompat:appcompat:1.0.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
@@ -268,6 +272,7 @@ dependencies {
 
     configurations.all {
         resolutionStrategy.force 'com.android.support:support-annotations:23.1.0'
+        resolutionStrategy.force 'net.zetetic:sqlcipher-android:4.5.4'
     }
     // PowerMock
     def powerMockVersion = '2.0.9'
