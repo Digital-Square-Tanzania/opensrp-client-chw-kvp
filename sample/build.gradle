@@ -83,6 +83,13 @@ allprojects {
     }
 }
 
+configurations.all {
+    exclude group: 'io.ona.CircleProgressbar', module: 'lib'
+    exclude group: 'io.ona.rdt-capture', module: 'lib'
+    exclude group: 'org.smartregister', module: 'opensrp-client-simprints'
+    exclude group: 'com.simprints', module: 'libsimprints'
+}
+
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
     implementation('org.smartregister:opensrp-client-core:1.11.5-SNAPSHOT@aar') {
@@ -101,6 +108,9 @@ dependencies {
         exclude group: 'com.android.support', module: 'recyclerview-v7'
         exclude group: 'com.android.support', module: 'appcompat-v7'
         exclude group: 'com.android.support', module: 'cardview-v7'
+        exclude group: 'io.ona.rdt-capture', module: 'lib'
+        exclude group: 'io.ona.CircleProgressbar', module: 'lib'
+        exclude group: 'org.smartregister', module: 'opensrp-client-simprints'
     }
 
     implementation('org.smartregister:opensrp-client-configurable-views:1.1.5-SNAPSHOT@aar') {
@@ -109,7 +119,9 @@ dependencies {
         exclude group: 'org.smartregister', module: 'opensrp-client-native-form'
         exclude group: 'com.android.support', module: 'appcompat-v7'
     }
-    implementation project(':opensrp-chw-kvp')
+    implementation(project(':opensrp-chw-kvp')) {
+        transitive = false
+    }
 
 
     implementation 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'

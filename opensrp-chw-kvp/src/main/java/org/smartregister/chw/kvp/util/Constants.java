@@ -22,6 +22,8 @@ public interface Constants {
     interface JSON_FORM_EXTRA {
         String JSON = "json";
         String ENCOUNTER_TYPE = "encounter_type";
+        String DELETE_EVENT_ID = "deleted_event_id";
+        String DELETE_FORM_SUBMISSION_ID = "deleted_form_submission_id";
     }
 
     interface EVENT_TYPE {
@@ -31,6 +33,7 @@ public interface Constants {
         String KVP_REGISTRATION = "KVP Registration";
         String PrEP_REGISTRATION = "PrEP Registration";
         String VOID_EVENT = "Void Event";
+        String DELETE_EVENT = "Delete Event";
         String KVP_BIO_MEDICAL_SERVICE_VISIT = "KVP Bio Medical Service Visit";
         String KVP_BEHAVIORAL_SERVICE_VISIT = "KVP Behavioral Service Visit";
         String KVP_STRUCTURAL_SERVICE_VISIT = "KVP Structural Service Visit";

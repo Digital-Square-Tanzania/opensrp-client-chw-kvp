@@ -1,8 +1,12 @@
 package org.smartregister.chw.kvp.dao;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.smartregister.chw.kvp.KvpLibrary;
 import org.smartregister.chw.kvp.domain.MemberObject;
 import org.smartregister.chw.kvp.util.Constants;
+import org.smartregister.clientandeventmodel.Event;
 import org.smartregister.dao.AbstractDao;
 
 import java.text.SimpleDateFormat;
@@ -14,6 +18,20 @@ import java.util.Locale;
 import timber.log.Timber;
 
 public class KvpDao extends AbstractDao {
+
+    public static Event getEventByFormSubmissionId(String formSubmissionId) {
+        String sql = "select json from event where formSubmissionId = '" + formSubmissionId + "'";
+
+        DataMap<Event> dataMap = cursor -> {
+            try {
+                return KvpLibrary.getInstance().getEcSyncHelper().convert(new JSONObject(getCursorValue(cursor, "json")), Event.class);
+            } catch (JSONException e) {
+                Timber.e(e);
+            }
+            return null;
+        };
+        return AbstractDao.readSingleValue(sql, dataMap);
+    }
 
 
     public static boolean isRegisteredForKvpPrEP(String baseEntityID) {
