@@ -9,11 +9,13 @@ import android.util.Log;
 
 
 import com.vijay.jsonwizard.activities.JsonWizardFormActivity;
-import com.vijay.jsonwizard.factory.FileSourceFactoryHelper;
 import com.vijay.jsonwizard.domain.Form;
 
 import org.json.JSONObject;
 import org.smartregister.kvp.R;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 
 
 public class TestRegisterActivity extends AppCompatActivity {
@@ -36,7 +38,7 @@ public class TestRegisterActivity extends AppCompatActivity {
 
     private void startForm(String formName) throws Exception {
 
-        JSONObject jsonForm = FileSourceFactoryHelper.getFileSource("").getFormFromFile(getApplicationContext(), formName);
+        JSONObject jsonForm = getFormFromAssets(formName);
         String currentLocationId = "Tanzania";
         if (jsonForm != null) {
             jsonForm.getJSONObject("metadata").put("encounter_location", currentLocationId);
@@ -57,5 +59,20 @@ public class TestRegisterActivity extends AppCompatActivity {
 
         }
 
+    }
+
+    private JSONObject getFormFromAssets(String formName) throws Exception {
+        InputStream inputStream = getAssets().open("json.form/" + formName + ".json");
+        try {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, length);
+            }
+            return new JSONObject(outputStream.toString("UTF-8"));
+        } finally {
+            inputStream.close();
+        }
     }
 }
