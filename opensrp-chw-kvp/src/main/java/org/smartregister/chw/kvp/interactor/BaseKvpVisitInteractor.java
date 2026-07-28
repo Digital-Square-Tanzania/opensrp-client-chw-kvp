@@ -313,11 +313,11 @@ public class BaseKvpVisitInteractor implements BaseKvpVisitContract.Interactor {
         Visit visit = visitRepository().getVisitByVisitId(visitID);
         if (visit == null || !visit.getProcessed()) return;
 
-        Event processedEvent = HpsDao.getEventByFormSubmissionId(visit.getFormSubmissionId());
+        Event processedEvent = KvpDao.getEventByFormSubmissionId(visit.getFormSubmissionId());
         if (processedEvent == null) return;
 
         deleteSavedEvent(allSharedPreferences, baseEntityId, processedEvent.getEventId(), processedEvent.getFormSubmissionId(), "event");
-        HpsLibrary.getInstance().visitRepository().deleteVisit(visitID);
+        KvpLibrary.getInstance().visitRepository().deleteVisit(visitID);
     }
 
     protected void deleteSavedEvent(AllSharedPreferences allSharedPreferences, String baseEntityId, String eventId, String formSubmissionId, String type) {
@@ -325,7 +325,7 @@ public class BaseKvpVisitInteractor implements BaseKvpVisitContract.Interactor {
                 .withBaseEntityId(baseEntityId)
                 .withEventDate(new Date())
                 .withEventType(Constants.EVENT_TYPE.DELETE_EVENT)
-                .withLocationId(HpsJsonFormUtils.locationId(allSharedPreferences))
+                .withLocationId(KvpJsonFormUtils.locationId(allSharedPreferences))
                 .withProviderId(allSharedPreferences.fetchRegisteredANM())
                 .withEntityType(type)
                 .withFormSubmissionId(UUID.randomUUID().toString())
@@ -335,7 +335,7 @@ public class BaseKvpVisitInteractor implements BaseKvpVisitContract.Interactor {
         event.addDetails(Constants.JSON_FORM_EXTRA.DELETE_FORM_SUBMISSION_ID, formSubmissionId);
 
         try {
-            syncHelper.addEvent(event.getBaseEntityId(), new JSONObject(HpsJsonFormUtils.gson.toJson(event)));
+            syncHelper.addEvent(event.getBaseEntityId(), new JSONObject(KvpJsonFormUtils.gson.toJson(event)));
         } catch (Exception e) {
             Timber.e(e);
         }

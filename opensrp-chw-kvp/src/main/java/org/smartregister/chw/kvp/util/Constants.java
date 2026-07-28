@@ -33,6 +33,7 @@ public interface Constants {
         String KVP_REGISTRATION = "KVP Registration";
         String PrEP_REGISTRATION = "PrEP Registration";
         String VOID_EVENT = "Void Event";
+        String DELETE_EVENT = "Delete Event";
         String KVP_BIO_MEDICAL_SERVICE_VISIT = "KVP Bio Medical Service Visit";
         String KVP_BEHAVIORAL_SERVICE_VISIT = "KVP Behavioral Service Visit";
         String KVP_STRUCTURAL_SERVICE_VISIT = "KVP Structural Service Visit";
