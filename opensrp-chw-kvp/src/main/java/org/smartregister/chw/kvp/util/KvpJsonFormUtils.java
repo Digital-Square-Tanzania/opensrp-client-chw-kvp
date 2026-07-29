@@ -27,7 +27,9 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -246,32 +248,28 @@ public class KvpJsonFormUtils extends org.smartregister.util.JsonFormUtils {
         JSONArray values = new JSONArray();
         if (jo.getString(JsonFormConstants.TYPE).equalsIgnoreCase(JsonFormConstants.CHECK_BOX)) {
             JSONArray options = jo.getJSONArray(JsonFormConstants.OPTIONS_FIELD_NAME);
-            HashMap<String, NameID> valueMap = new HashMap<>();
+            HashMap<String, NameID> keyMap = new HashMap<>();
+            HashMap<String, NameID> textMap = new HashMap<>();
 
             int x = options.length() - 1;
             while (x >= 0) {
                 JSONObject object = options.getJSONObject(x);
-                valueMap.put(object.getString(JsonFormConstants.KEY), new NameID(object.getString(JsonFormConstants.KEY), x));
+                String key = object.getString(JsonFormConstants.KEY);
+                NameID nameID = new NameID(key, x);
+                keyMap.put(normalizeCheckboxValue(key), nameID);
+
+                String text = object.optString(JsonFormConstants.TEXT);
+                if (StringUtils.isNotBlank(text)) {
+                    textMap.put(normalizeCheckboxValue(text), nameID);
+                }
                 x--;
             }
 
+            Set<String> selectedKeys = new HashSet<>();
             for (VisitDetail d : visitDetails) {
-                String val = getValue(d);
-                List<String> checkedList = new ArrayList<>(Arrays.asList(val.split(", ")));
-                if (checkedList.size() > 1) {
-                    for (String item : checkedList) {
-                        NameID nid = valueMap.get(item);
-                        if (nid != null) {
-                            values.put(nid.name);
-                            options.getJSONObject(nid.position).put(JsonFormConstants.VALUE, true);
-                        }
-                    }
-                } else {
-                    NameID nid = valueMap.get(val);
-                    if (nid != null) {
-                        values.put(nid.name);
-                        options.getJSONObject(nid.position).put(JsonFormConstants.VALUE, true);
-                    }
+                boolean restored = restoreCheckboxValues(d.getDetails(), keyMap, textMap, options, values, selectedKeys);
+                if (!restored) {
+                    restoreCheckboxValues(d.getHumanReadable(), keyMap, textMap, options, values, selectedKeys);
                 }
             }
         } else {
@@ -283,6 +281,37 @@ public class KvpJsonFormUtils extends org.smartregister.util.JsonFormUtils {
             }
         }
         return values;
+    }
+
+    private static boolean restoreCheckboxValues(String storedValues, Map<String, NameID> keyMap,
+                                                 Map<String, NameID> textMap, JSONArray options,
+                                                 JSONArray values, Set<String> selectedKeys) throws JSONException {
+        if (StringUtils.isBlank(storedValues)) {
+            return false;
+        }
+
+        boolean restored = false;
+        List<String> checkedList = new ArrayList<>(Arrays.asList(storedValues.split(",\\s*")));
+        for (String item : checkedList) {
+            String normalizedValue = normalizeCheckboxValue(item);
+            NameID nameID = keyMap.get(normalizedValue);
+            if (nameID == null) {
+                nameID = textMap.get(normalizedValue);
+            }
+
+            if (nameID != null) {
+                restored = true;
+                if (selectedKeys.add(nameID.name)) {
+                    values.put(nameID.name);
+                    options.getJSONObject(nameID.position).put(JsonFormConstants.VALUE, true);
+                }
+            }
+        }
+        return restored;
+    }
+
+    private static String normalizeCheckboxValue(String value) {
+        return StringUtils.trimToEmpty(value).toLowerCase(Locale.ROOT);
     }
 
     public static Event processVisitJsonForm(AllSharedPreferences allSharedPreferences, String entityId, String encounterType, Map<String, String> jsonStrings, String tableName) {
