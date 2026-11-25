@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## 2.0.4-KITUONI-UCSW-186-VISIT-14-SNAPSHOT — 2026-11-25
+
+### Fixed
+
+- Let Kituoni apply its Health Education completion rule when displaying and processing Behavioral visits. Existing initializers keep the IEC/SBCC and Health Education rule. Set the library version code to 19 (UCSW-186).
+
 ## 2.0.3-KITUONI-UCSW-47-VISIT-10-SNAPSHOT — 2026-11-25
 
 ### Fixed
