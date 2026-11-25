@@ -222,6 +222,10 @@ public class KvpVisitsUtil extends VisitUtils {
             }
             completionObject.put("is-tb_screening-done", computeCompletionStatus(obs, "tb_screening"));
 
+            if (!completionObject.get("is-family_planning-done")
+                    && KvpLibrary.getInstance().isFamilyPlanningExempt(lastVisit, gender)) {
+                completionObject.remove("is-family_planning-done");
+            }
         } catch (Exception e) {
             Timber.e(e);
         }

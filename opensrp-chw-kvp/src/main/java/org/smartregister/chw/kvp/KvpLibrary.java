@@ -2,6 +2,7 @@ package org.smartregister.chw.kvp;
 
 import org.smartregister.Context;
 import org.smartregister.CoreLibrary;
+import org.smartregister.chw.kvp.domain.Visit;
 import org.smartregister.chw.kvp.repository.VisitDetailsRepository;
 import org.smartregister.chw.kvp.repository.VisitRepository;
 import org.smartregister.repository.Repository;
@@ -11,10 +12,15 @@ import org.smartregister.sync.helper.ECSyncHelper;
 import id.zelory.compressor.Compressor;
 
 public class KvpLibrary {
+    public interface FamilyPlanningExemption {
+        boolean appliesTo(Visit visit, String gender);
+    }
+
     private static KvpLibrary instance;
 
     private final Context context;
     private final Repository repository;
+    private final FamilyPlanningExemption familyPlanningExemption;
 
     private int applicationVersion;
     private int databaseVersion;
@@ -55,17 +61,28 @@ public class KvpLibrary {
     }
 
 
-    private KvpLibrary(Context contextArg, Repository repositoryArg, int applicationVersion, int databaseVersion) {
+    private KvpLibrary(Context contextArg, Repository repositoryArg, int applicationVersion, int databaseVersion,
+                       FamilyPlanningExemption familyPlanningExemption) {
         this.context = contextArg;
         this.repository = repositoryArg;
         this.applicationVersion = applicationVersion;
         this.databaseVersion = databaseVersion;
+        this.familyPlanningExemption = familyPlanningExemption;
     }
 
     public static void init(Context context, Repository repository, int applicationVersion, int databaseVersion) {
+        init(context, repository, applicationVersion, databaseVersion, (visit, gender) -> false);
+    }
+
+    public static void init(Context context, Repository repository, int applicationVersion, int databaseVersion,
+                            FamilyPlanningExemption familyPlanningExemption) {
         if (instance == null) {
-            instance = new KvpLibrary(context, repository, applicationVersion, databaseVersion);
+            instance = new KvpLibrary(context, repository, applicationVersion, databaseVersion, familyPlanningExemption);
         }
+    }
+
+    public boolean isFamilyPlanningExempt(Visit visit, String gender) {
+        return familyPlanningExemption.appliesTo(visit, gender);
     }
 
     public static KvpLibrary getInstance() {
