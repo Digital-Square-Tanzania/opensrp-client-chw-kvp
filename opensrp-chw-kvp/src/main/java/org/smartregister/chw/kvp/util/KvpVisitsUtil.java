@@ -283,6 +283,11 @@ public class KvpVisitsUtil extends VisitUtils {
             JSONObject jsonObject = new JSONObject(lastVisit.getJson());
             JSONArray obs = jsonObject.getJSONArray("obs");
 
+            KvpLibrary.BehavioralCompletion behavioralCompletion = KvpLibrary.getBehavioralCompletion();
+            if (behavioralCompletion != null) {
+                return behavioralCompletion.isComplete(obs) ? Complete : Pending;
+            }
+
             completionObject.put("is-iec_sbcc-done", computeCompletionStatus(obs, "iec_sbcc_materials"));
             completionObject.put("is-health_education-done", computeCompletionStatus(obs, "health_education_provided"));
 

@@ -1,5 +1,6 @@
 package org.smartregister.chw.kvp;
 
+import org.json.JSONArray;
 import org.smartregister.Context;
 import org.smartregister.CoreLibrary;
 import org.smartregister.chw.kvp.domain.Visit;
@@ -20,12 +21,17 @@ public class KvpLibrary {
         boolean appliesTo(Visit visit, String gender);
     }
 
+    public interface BehavioralCompletion {
+        boolean isComplete(JSONArray observations);
+    }
+
     private static KvpLibrary instance;
 
     private final Context context;
     private final Repository repository;
     private final FamilyPlanningExemption familyPlanningExemption;
     private final CervicalScreeningExemption cervicalScreeningExemption;
+    private final BehavioralCompletion behavioralCompletion;
 
     private int applicationVersion;
     private int databaseVersion;
@@ -68,13 +74,15 @@ public class KvpLibrary {
 
     private KvpLibrary(Context contextArg, Repository repositoryArg, int applicationVersion, int databaseVersion,
                        FamilyPlanningExemption familyPlanningExemption,
-                       CervicalScreeningExemption cervicalScreeningExemption) {
+                       CervicalScreeningExemption cervicalScreeningExemption,
+                       BehavioralCompletion behavioralCompletion) {
         this.context = contextArg;
         this.repository = repositoryArg;
         this.applicationVersion = applicationVersion;
         this.databaseVersion = databaseVersion;
         this.familyPlanningExemption = familyPlanningExemption;
         this.cervicalScreeningExemption = cervicalScreeningExemption;
+        this.behavioralCompletion = behavioralCompletion;
     }
 
     public static void init(Context context, Repository repository, int applicationVersion, int databaseVersion) {
@@ -89,10 +97,22 @@ public class KvpLibrary {
     public static void init(Context context, Repository repository, int applicationVersion, int databaseVersion,
                             FamilyPlanningExemption familyPlanningExemption,
                             CervicalScreeningExemption cervicalScreeningExemption) {
+        init(context, repository, applicationVersion, databaseVersion, familyPlanningExemption,
+                cervicalScreeningExemption, null);
+    }
+
+    public static void init(Context context, Repository repository, int applicationVersion, int databaseVersion,
+                            FamilyPlanningExemption familyPlanningExemption,
+                            CervicalScreeningExemption cervicalScreeningExemption,
+                            BehavioralCompletion behavioralCompletion) {
         if (instance == null) {
             instance = new KvpLibrary(context, repository, applicationVersion, databaseVersion,
-                    familyPlanningExemption, cervicalScreeningExemption);
+                    familyPlanningExemption, cervicalScreeningExemption, behavioralCompletion);
         }
+    }
+
+    public static BehavioralCompletion getBehavioralCompletion() {
+        return instance == null ? null : instance.behavioralCompletion;
     }
 
     public boolean isFamilyPlanningExempt(Visit visit, String gender) {
