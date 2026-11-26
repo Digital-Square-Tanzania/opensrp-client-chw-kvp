@@ -12,13 +12,12 @@ import org.smartregister.chw.kvp.KvpLibrary;
 import org.smartregister.chw.kvp.dao.KvpDao;
 import org.smartregister.chw.kvp.domain.MemberObject;
 import org.smartregister.chw.kvp.domain.Visit;
-import org.smartregister.chw.kvp.repository.VisitDetailsRepository;
 import org.smartregister.chw.kvp.repository.VisitRepository;
 import org.smartregister.clientandeventmodel.Event;
 import org.smartregister.clientandeventmodel.Obs;
-import org.smartregister.repository.AllSharedPreferences;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -36,79 +35,45 @@ public class KvpVisitsUtil extends VisitUtils {
     public static String Ongoing = "ongoing";
 
     public static void processVisits() throws Exception {
-        processVisits(KvpLibrary.getInstance().visitRepository(), KvpLibrary.getInstance().visitDetailsRepository());
-    }
-
-    private static void processVisits(VisitRepository visitRepository, VisitDetailsRepository visitDetailsRepository) throws Exception {
-        List<Visit> visits = visitRepository.getAllUnSynced();
-        List<Visit> bioMedicalServiceVisit = new ArrayList<>();
-        List<Visit> behavioralServiceVisits = new ArrayList<>();
-        List<Visit> structuralServiceVisits = new ArrayList<>();
-        List<Visit> otherServiceVisits = new ArrayList<>();
-
-        for (Visit v : visits) {
-            Date updatedAtDate = new Date(v.getUpdatedAt().getTime());
-            int daysDiff = TimeUtils.getElapsedDays(updatedAtDate);
-            if (daysDiff > 1) {
-                if (v.getVisitType().equalsIgnoreCase(Constants.EVENT_TYPE.KVP_BIO_MEDICAL_SERVICE_VISIT) && getBioMedicalStatus(v).equals(Complete)) {
-                    bioMedicalServiceVisit.add(v);
-                    String hivStatus = getHivStatus(v);
-                    if (hivStatus != null && hivStatus.equalsIgnoreCase("positive")) {
-                        Event baseEvent = generateHivRegistrationForPositiveKvpClients(v.getJson(), v.getBaseEntityId());
-                        if (StringUtils.isBlank(baseEvent.getFormSubmissionId()))
-                            baseEvent.setFormSubmissionId(UUID.randomUUID().toString());
-                        AllSharedPreferences allSharedPreferences = KvpLibrary.getInstance().context().allSharedPreferences();
-                        NCUtil.addEvent(allSharedPreferences, baseEvent);
-                        NCUtil.startClientProcessing();
-                    }
-
-                    try {
-                        if (getHepTesting(v, "hep_b_testing").equals("yes")) {
-                            Event baseEvent = generateHepTestResultsRegistrationEvent(v.getVisitId() + "-hep_b", v.getBaseEntityId(), "hep_b", getHepTesting(v, "hep_b_result"), v.getDate());
-                            if (StringUtils.isBlank(baseEvent.getFormSubmissionId()))
-                                baseEvent.setFormSubmissionId(UUID.randomUUID().toString());
-                            AllSharedPreferences allSharedPreferences = KvpLibrary.getInstance().context().allSharedPreferences();
-                            KvpJsonFormUtils.tagEvent(allSharedPreferences, baseEvent);
-                            NCUtil.addEvent(allSharedPreferences, baseEvent);
-                            NCUtil.startClientProcessing();
-                        }
-
-                        if (getHepTesting(v, "hep_c_testing").equals("yes")) {
-                            Event baseEvent = generateHepTestResultsRegistrationEvent(v.getVisitId() + "-hep_c", v.getBaseEntityId(), "hep_c", getHepTesting(v, "hep_c_result"), v.getDate());
-                            if (StringUtils.isBlank(baseEvent.getFormSubmissionId()))
-                                baseEvent.setFormSubmissionId(UUID.randomUUID().toString());
-                            AllSharedPreferences allSharedPreferences = KvpLibrary.getInstance().context().allSharedPreferences();
-                            KvpJsonFormUtils.tagEvent(allSharedPreferences, baseEvent);
-                            NCUtil.addEvent(allSharedPreferences, baseEvent);
-                            NCUtil.startClientProcessing();
-                        }
-                    } catch (Exception e) {
-                        Timber.e(e);
-                    }
+        VisitRepository repository = KvpLibrary.getInstance().visitRepository();
+        List<Visit> visits = repository.getAllUnSynced();
+        boolean queued = false;
+        for (String type : MarpVisitProcessing.SERVICE_TYPES) {
+            String visitGroupId = UUID.randomUUID().toString();
+            for (Visit visit : visits) {
+                if (!type.equalsIgnoreCase(visit.getVisitType()) || !isReadyForScheduledProcessing(visit)) {
+                    continue;
                 }
-                if (v.getVisitType().equalsIgnoreCase(Constants.EVENT_TYPE.KVP_BEHAVIORAL_SERVICE_VISIT) && getBehavioralServiceStatus(v).equals(Complete)) {
-                    behavioralServiceVisits.add(v);
-                }
-                if (v.getVisitType().equalsIgnoreCase(Constants.EVENT_TYPE.KVP_STRUCTURAL_SERVICE_VISIT) && getStructuralServiceStatus(v).equals(Complete)) {
-                    structuralServiceVisits.add(v);
-                }
-                if (v.getVisitType().equalsIgnoreCase(Constants.EVENT_TYPE.KVP_OTHER_SERVICE_VISIT) && getOtherServiceStatus(v).equals(Complete)) {
-                    otherServiceVisits.add(v);
+                try {
+                    queued |= MarpVisitProcessing.enqueue(repository, visit, visitGroupId,
+                            KvpVisitsUtil::isReadyForScheduledProcessing, KvpVisitsUtil::addMarpEvent);
+                } catch (Exception exception) {
+                    Timber.e(exception, "Unable to queue a scheduled MARP service card");
                 }
             }
         }
-        if (bioMedicalServiceVisit.size() > 0) {
-            processVisits(bioMedicalServiceVisit, visitRepository, visitDetailsRepository);
+        if (queued || MarpVisitProcessing.hasUnprocessedPrimary(repository)) {
+            processLocalQueue();
         }
-        if (behavioralServiceVisits.size() > 0) {
-            processVisits(behavioralServiceVisits, visitRepository, visitDetailsRepository);
+    }
+
+    static boolean isReadyForScheduledProcessing(Visit visit) {
+        if (TimeUtils.getElapsedDays(visit.getUpdatedAt()) <= 1) {
+            return false;
         }
-        if (structuralServiceVisits.size() > 0) {
-            processVisits(structuralServiceVisits, visitRepository, visitDetailsRepository);
+
+        String type = visit.getVisitType();
+        if (Constants.EVENT_TYPE.KVP_BIO_MEDICAL_SERVICE_VISIT.equalsIgnoreCase(type)) {
+            return Complete.equals(getBioMedicalStatus(visit));
         }
-        if (otherServiceVisits.size() > 0) {
-            processVisits(otherServiceVisits, visitRepository, visitDetailsRepository);
+        if (Constants.EVENT_TYPE.KVP_BEHAVIORAL_SERVICE_VISIT.equalsIgnoreCase(type)) {
+            return Complete.equals(getBehavioralServiceStatus(visit));
         }
+        if (Constants.EVENT_TYPE.KVP_STRUCTURAL_SERVICE_VISIT.equalsIgnoreCase(type)) {
+            return Complete.equals(getStructuralServiceStatus(visit));
+        }
+        return Constants.EVENT_TYPE.KVP_OTHER_SERVICE_VISIT.equalsIgnoreCase(type)
+                && Complete.equals(getOtherServiceStatus(visit));
     }
 
     protected static Event generateHivRegistrationForPositiveKvpClients(String jsonString, String baseEntityId) {
@@ -349,40 +314,25 @@ public class KvpVisitsUtil extends VisitUtils {
     }
 
     public static void manualProcessVisit(Visit visit) throws Exception {
-        List<Visit> manualProcessedVisits = new ArrayList<>();
-        VisitDetailsRepository visitDetailsRepository = KvpLibrary.getInstance().visitDetailsRepository();
-        VisitRepository visitRepository = KvpLibrary.getInstance().visitRepository();
-        manualProcessedVisits.add(visit);
-        processVisits(manualProcessedVisits, visitRepository, visitDetailsRepository);
+        KvpLibrary library = KvpLibrary.getInstance();
+        if (visit != null && !MarpVisitProcessing.isServiceType(visit.getVisitType())) {
+            processVisits(Collections.singletonList(visit), library.visitRepository(),
+                    library.visitDetailsRepository());
+        } else if (MarpVisitProcessing.enqueue(library.visitRepository(), visit, UUID.randomUUID().toString(),
+                current -> true, KvpVisitsUtil::addMarpEvent)) {
+            processLocalQueue();
+        }
+    }
 
-        if (visit.getVisitType().equalsIgnoreCase(Constants.EVENT_TYPE.KVP_BIO_MEDICAL_SERVICE_VISIT)) {
-            String hivStatus = getHivStatus(visit);
-            if (hivStatus != null && hivStatus.equalsIgnoreCase("positive")) {
-                Event baseEvent = generateHivRegistrationForPositiveKvpClients(visit.getJson(), visit.getBaseEntityId());
-                if (StringUtils.isBlank(baseEvent.getFormSubmissionId()))
-                    baseEvent.setFormSubmissionId(UUID.randomUUID().toString());
-                AllSharedPreferences allSharedPreferences = KvpLibrary.getInstance().context().allSharedPreferences();
-                NCUtil.addEvent(allSharedPreferences, baseEvent);
-                NCUtil.startClientProcessing();
-            }
+    private static void addMarpEvent(Event event) throws Exception {
+        NCUtil.addEvent(KvpLibrary.getInstance().context().allSharedPreferences(), event);
+    }
 
-            if (getHepTesting(visit, "hep_b_testing").equals("yes")) {
-                Event baseEvent = generateHepTestResultsRegistrationEvent(visit.getVisitId() + "-hep_b", visit.getBaseEntityId(), "hep_b", getHepTesting(visit, "hep_b_result"), visit.getDate());
-                if (StringUtils.isBlank(baseEvent.getFormSubmissionId()))
-                    baseEvent.setFormSubmissionId(UUID.randomUUID().toString());
-                AllSharedPreferences allSharedPreferences = KvpLibrary.getInstance().context().allSharedPreferences();
-                NCUtil.addEvent(allSharedPreferences, baseEvent);
-                NCUtil.startClientProcessing();
-            }
-
-            if (getHepTesting(visit, "hep_c_testing").equals("yes")) {
-                Event baseEvent = generateHepTestResultsRegistrationEvent(visit.getVisitId() + "-hep_c", visit.getBaseEntityId(), "hep_c", getHepTesting(visit, "hep_c_result"), visit.getDate());
-                if (StringUtils.isBlank(baseEvent.getFormSubmissionId()))
-                    baseEvent.setFormSubmissionId(UUID.randomUUID().toString());
-                AllSharedPreferences allSharedPreferences = KvpLibrary.getInstance().context().allSharedPreferences();
-                NCUtil.addEvent(allSharedPreferences, baseEvent);
-                NCUtil.startClientProcessing();
-            }
+    private static void processLocalQueue() throws Exception {
+        // Lock the processor before reading the normal queue so these two MARP routes
+        // cannot both hand it the same detached unprocessed event list.
+        synchronized (NCUtil.getClientProcessorForJava()) {
+            NCUtil.startClientProcessing();
         }
     }
 

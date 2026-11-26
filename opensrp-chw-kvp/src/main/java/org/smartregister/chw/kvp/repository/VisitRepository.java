@@ -143,6 +143,15 @@ public class VisitRepository extends BaseRepository {
         }
     }
 
+    public boolean completeProcessing(SQLiteDatabase database, Visit visit) {
+        ContentValues values = new ContentValues();
+        values.put(PROCESSED, 1);
+        values.put(PRE_PROCESSED, "");
+        return database.update(VISIT_TABLE, values,
+                VISIT_ID + " = ? AND " + FORM_SUBMISSION_ID + " = ? AND " + PROCESSED + " = 0",
+                new String[]{visit.getVisitId(), visit.getFormSubmissionId()}) == 1;
+    }
+
     public List<Visit> readVisits(Cursor cursor) {
         List<Visit> visits = new ArrayList<>();
 
@@ -314,19 +323,28 @@ public class VisitRepository extends BaseRepository {
     }
 
     public Visit getVisitByVisitId(String visitID) {
-        List<Visit> visits = new ArrayList<>();
-        Cursor cursor = null;
         try {
-            cursor = getReadableDatabase().query(VISIT_TABLE, VISIT_COLUMNS, VISIT_ID + " = ? ", new String[]{visitID}, null, null, VISIT_DATE + " DESC ", null);
-            visits = readVisits(cursor);
+            return getVisitByVisitId(getReadableDatabase(), visitID);
         } catch (Exception e) {
             Timber.e(e);
+            return null;
+        }
+    }
+
+    public Visit getVisitByVisitId(SQLiteDatabase database, String visitID) {
+        Cursor cursor = database.query(VISIT_TABLE, VISIT_COLUMNS, VISIT_ID + " = ?",
+                new String[]{visitID}, null, null, null, "2");
+        try {
+            if (cursor.getCount() != 1) {
+                return null;
+            }
+            List<Visit> visits = readVisits(cursor);
+            return visits.size() == 1 ? visits.get(0) : null;
         } finally {
-            if (cursor != null) {
+            if (!cursor.isClosed()) {
                 cursor.close();
             }
         }
-        return visits.size() == 1 ? visits.get(0) : null;
     }
 
     public List<Visit> getChildEvents(String visitID) {
