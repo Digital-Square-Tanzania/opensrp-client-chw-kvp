@@ -29,6 +29,8 @@ import timber.log.Timber;
 
 public class KvpVisitsUtil extends VisitUtils {
 
+    private static final String CERVICAL_SCREENING_DONE = "is-cervical_cancer_screening-done";
+
     public static String Complete = "complete";
     public static String Pending = "pending";
     public static String Ongoing = "ongoing";
@@ -218,13 +220,17 @@ public class KvpVisitsUtil extends VisitUtils {
                 if (StringUtils.isBlank(vmmcServices) || vmmcServices.equalsIgnoreCase("not_provided"))
                     completionObject.put("is-vmmc-done", computeCompletionStatus(obs, "vmcc_provided"));
             } else {
-                completionObject.put("is-cervical_cancer_screening-done", computeCompletionStatus(obs, "cervical_cancer_screening"));
+                completionObject.put(CERVICAL_SCREENING_DONE, computeCompletionStatus(obs, "cervical_cancer_screening"));
             }
             completionObject.put("is-tb_screening-done", computeCompletionStatus(obs, "tb_screening"));
 
             if (!completionObject.get("is-family_planning-done")
                     && KvpLibrary.getInstance().isFamilyPlanningExempt(lastVisit, gender)) {
                 completionObject.remove("is-family_planning-done");
+            }
+            if (Boolean.FALSE.equals(completionObject.get(CERVICAL_SCREENING_DONE))
+                    && KvpLibrary.getInstance().isCervicalScreeningExempt(lastVisit, gender)) {
+                completionObject.remove(CERVICAL_SCREENING_DONE);
             }
         } catch (Exception e) {
             Timber.e(e);

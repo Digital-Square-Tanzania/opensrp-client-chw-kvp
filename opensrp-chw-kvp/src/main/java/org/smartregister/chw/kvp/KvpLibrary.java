@@ -16,11 +16,16 @@ public class KvpLibrary {
         boolean appliesTo(Visit visit, String gender);
     }
 
+    public interface CervicalScreeningExemption {
+        boolean appliesTo(Visit visit, String gender);
+    }
+
     private static KvpLibrary instance;
 
     private final Context context;
     private final Repository repository;
     private final FamilyPlanningExemption familyPlanningExemption;
+    private final CervicalScreeningExemption cervicalScreeningExemption;
 
     private int applicationVersion;
     private int databaseVersion;
@@ -62,12 +67,14 @@ public class KvpLibrary {
 
 
     private KvpLibrary(Context contextArg, Repository repositoryArg, int applicationVersion, int databaseVersion,
-                       FamilyPlanningExemption familyPlanningExemption) {
+                       FamilyPlanningExemption familyPlanningExemption,
+                       CervicalScreeningExemption cervicalScreeningExemption) {
         this.context = contextArg;
         this.repository = repositoryArg;
         this.applicationVersion = applicationVersion;
         this.databaseVersion = databaseVersion;
         this.familyPlanningExemption = familyPlanningExemption;
+        this.cervicalScreeningExemption = cervicalScreeningExemption;
     }
 
     public static void init(Context context, Repository repository, int applicationVersion, int databaseVersion) {
@@ -76,13 +83,24 @@ public class KvpLibrary {
 
     public static void init(Context context, Repository repository, int applicationVersion, int databaseVersion,
                             FamilyPlanningExemption familyPlanningExemption) {
+        init(context, repository, applicationVersion, databaseVersion, familyPlanningExemption, (visit, gender) -> false);
+    }
+
+    public static void init(Context context, Repository repository, int applicationVersion, int databaseVersion,
+                            FamilyPlanningExemption familyPlanningExemption,
+                            CervicalScreeningExemption cervicalScreeningExemption) {
         if (instance == null) {
-            instance = new KvpLibrary(context, repository, applicationVersion, databaseVersion, familyPlanningExemption);
+            instance = new KvpLibrary(context, repository, applicationVersion, databaseVersion,
+                    familyPlanningExemption, cervicalScreeningExemption);
         }
     }
 
     public boolean isFamilyPlanningExempt(Visit visit, String gender) {
         return familyPlanningExemption.appliesTo(visit, gender);
+    }
+
+    public boolean isCervicalScreeningExempt(Visit visit, String gender) {
+        return cervicalScreeningExemption.appliesTo(visit, gender);
     }
 
     public static KvpLibrary getInstance() {
