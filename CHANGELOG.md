@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+
+- Serialize manual and scheduled MARP processing by visit and submission, preserve staging on a failed event write, assign stable Biomedical follow-up IDs and expose exact local service projection evidence. Set the Kituoni library version to `2.0.5-KITUONI-UCSW-200-VISIT-23-SNAPSHOT` and version code to 20 (UCSW-200).
+
 ## 2.0.4-KITUONI-UCSW-186-VISIT-14-SNAPSHOT — 2026-11-25
 
 ### Fixed

@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 
+import net.zetetic.database.sqlcipher.SQLiteDatabase;
+
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -18,6 +20,7 @@ import org.smartregister.chw.kvp.repository.VisitRepository;
 import org.smartregister.chw.kvp.util.AppExecutors;
 import org.smartregister.chw.kvp.util.Constants;
 import org.smartregister.chw.kvp.util.KvpJsonFormUtils;
+import org.smartregister.chw.kvp.util.MarpVisitProcessing;
 import org.smartregister.chw.kvp.util.NCUtil;
 import org.smartregister.chw.kvp.util.VisitUtils;
 import org.smartregister.clientandeventmodel.Event;
@@ -266,24 +269,43 @@ public class BaseKvpVisitInteractor implements BaseKvpVisitContract.Interactor {
             baseEvent.setFormSubmissionId(KvpJsonFormUtils.generateRandomUUIDString());
             KvpJsonFormUtils.tagEvent(allSharedPreferences, baseEvent);
 
-            String visitID = (editMode) ?
-                    visitRepository().getLatestVisit(memberID, getEncounterType()).getVisitId() :
-                    KvpJsonFormUtils.generateRandomUUIDString();
-
-            // reset database
-            if (editMode) {
-                deleteProcessedVisit(visitID, memberID);
-                deleteOldVisit(visitID);
+            if (editMode && MarpVisitProcessing.isServiceType(encounterType)) {
+                SQLiteDatabase database = visitRepository().getWritableDatabase();
+                if (!database.inTransaction()) {
+                    database.beginTransactionNonExclusive();
+                    try {
+                        Visit replacement = persistVisit(baseEvent, true, memberID, parentEventType);
+                        Visit saved = visitRepository().getVisitByVisitId(database, replacement.getVisitId());
+                        if (saved == null || !replacement.getFormSubmissionId().equals(saved.getFormSubmissionId())) {
+                            throw new IllegalStateException("The MARP History replacement could not be saved");
+                        }
+                        database.setTransactionSuccessful();
+                        return replacement;
+                    } finally {
+                        database.endTransaction();
+                    }
+                }
             }
-
-            Visit visit = NCUtil.eventToVisit(baseEvent, visitID);
-            visit.setPreProcessedJson(new Gson().toJson(baseEvent));
-            visit.setParentVisitID(getParentVisitEventID(visit, parentEventType));
-
-            visitRepository().addVisit(visit);
-            return visit;
+            return persistVisit(baseEvent, editMode, memberID, parentEventType);
         }
         return null;
+    }
+
+    private Visit persistVisit(Event baseEvent, boolean editMode, String memberID, String parentEventType)
+            throws Exception {
+        String visitID = editMode
+                ? visitRepository().getLatestVisit(memberID, getEncounterType()).getVisitId()
+                : KvpJsonFormUtils.generateRandomUUIDString();
+        if (editMode) {
+            deleteProcessedVisit(visitID, memberID);
+            deleteOldVisit(visitID);
+        }
+
+        Visit visit = NCUtil.eventToVisit(baseEvent, visitID);
+        visit.setPreProcessedJson(new Gson().toJson(baseEvent));
+        visit.setParentVisitID(getParentVisitEventID(visit, parentEventType));
+        visitRepository().addVisit(visit);
+        return visit;
     }
 
     protected String getParentVisitEventID(Visit visit, String parentEventType) {
